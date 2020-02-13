@@ -1,3 +1,5 @@
+How to run
+env FLASK_APP=server.py flask run
 ## GEAR
 
 Source code and dataset for the ACL 2019 paper "[GEAR: Graph-based Evidence Aggregating and Reasoning for Fact Verification](GEAR.pdf)".

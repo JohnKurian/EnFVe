@@ -27,12 +27,12 @@
   	
     <h1 align="center"></h1>
   
-	<form>
+	<form role="form" method="POST" action="/">
         <h4 align="center">What do you claim?</h4>
   		<div class="input-group mb-3 input-group-lg">
-            <input type="text" class="form-control">
+            <input  name="url" type="text" class="form-control">
             <div class="input-group-append">
-                <button class="btn btn-primary" type="button">OK</button>
+                <button  type="submit" class="btn btn-primary" type="button">Submit</button>
                 <button class="btn btn-danger" type="button">Cancel</button>
               </div>
   		</div>
@@ -41,14 +41,17 @@
     <h1 align="center"></h1>
 
 	<div class="col-sm-12">
+        {% if results %}
       	<h4 align="center">Evidences</h4>
      	<ul class="list-group">
-          <li class="list-group-item list-group-item-secondary">Evidence 1</li>
-          <li class="list-group-item list-group-item-secondary">Evidence 2</li>
-          <li class="list-group-item list-group-item-secondary">Evidence 3</li>
+            {% for result in results%}
+          <li class="list-group-item list-group-item-secondary">{{result}}</li>
+            {% endfor %}
   		</ul>
+        {% endif %}
   	</div>
-  
+
+<!--    #fafcff-->
     <!--<h1 align="center"></h1>
     <h4 align="center">The Predicted Result says that the</h4>
   	<div class="alert alert-success">
@@ -59,8 +62,10 @@
     </div>-->
 
     <h1 align="center"></h1>
+    {% if results %}
     <h4 align="center">Predicted Result</h4>
-    <h1 align="center"></h1>
+    <h1 align="center">{{prediction_result}}</h1>
+    {% endif %}
     <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.css">
     <div class="container" align="center">
     <canvas id="myChart" width="500" height="500"></canvas>

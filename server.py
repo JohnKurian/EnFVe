@@ -521,4 +521,4 @@ def hello():
             errors.append(
                 "Unable to get URL. Please make sure it's valid and try again."
             )
-    return render_template('search.html', errors=errors, results=evidences, prediction_result = prediction_result, claim=claim)
+    return render_template('test.html', errors=errors, results=evidences, prediction_result = prediction_result, claim=claim)

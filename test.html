@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Fact Verification by JADGS</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.css">
+  <style>
+  .fakeimg {
+    height: 200px;
+    background: #aaa;
+  }
+  </style>
+</head>
+<body>
+
+	<div class="jumbotron text-center" style="margin-bottom:0">
+  		<h1>Explainable Automated Fake News Detection</h1>
+  		<p>Naturally Curious or Systematically Dangerous!</p>
+  		<p>By JADGS</p>
+	</div>
+  	
+    <h1 align="center"></h1>
+  
+	<form>
+        <h4 align="center">What do you claim?</h4>
+  		<div class="input-group mb-3 input-group-lg">
+            <input type="text" class="form-control">
+            <div class="input-group-append">
+                <button class="btn btn-primary" type="button">OK</button>
+                <button class="btn btn-danger" type="button">Cancel</button>
+              </div>
+  		</div>
+	</form>
+  
+    <h1 align="center"></h1>
+
+	<div class="col-sm-12">
+      	<h4 align="center">Evidences</h4>
+     	<ul class="list-group">
+          <li class="list-group-item list-group-item-secondary">Evidence 1</li>
+          <li class="list-group-item list-group-item-secondary">Evidence 2</li>
+          <li class="list-group-item list-group-item-secondary">Evidence 3</li>
+  		</ul>
+  	</div>
+  
+    <!--<h1 align="center"></h1>
+    <h4 align="center">The Predicted Result says that the</h4>
+  	<div class="alert alert-success">
+      <center><strong>Claim is Supported!</center></strong>  <a href="#" class="alert-link"></a>
+	</div>
+  	<div class="alert alert-danger">
+  		 <center><strong>Claim is Refuted!</center></strong>  <a href="#" class="alert-link"></a>
+    </div>-->
+
+    <h1 align="center"></h1>
+    <h4 align="center">Predicted Result</h4>
+    <h1 align="center"></h1>
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.css">
+    <div class="container" align="center">
+    <canvas id="myChart" width="500" height="500"></canvas>
+    </div>
+    <script>
+            window.onload = function() {
+                var ctx = document.getElementById('myChart').getContext('2d');
+    var myChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Supports', 'Not enough info', 'Refutes'],
+            datasets: [{
+                data: [5, 15, 2],
+                backgroundColor: [
+                "#00C851",
+                "#ffbb33",
+                "#ff4444"
+                ],
+                borderColor: [
+                '#1C2331',
+                    '#1C2331',
+                    '#1C2331'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options : {
+            responsive: false,
+        scales: {
+            xAxes: [{
+                gridLines: {
+                    display:false,
+                    drawBorder: false
+                },
+                ticks: {
+                    beginAtZero: true
+                }
+            }],
+            yAxes: [{
+                gridLines: {
+                    display:false,
+                    drawBorder: false
+                }  ,
+                ticks: {
+                    display: false,
+                    beginAtZero: true
+                }
+            }],
+        },
+        legend: {
+        display: false,
+    }
+    }
+    });
+            };
+    </script>
+
+</body>
+</html>

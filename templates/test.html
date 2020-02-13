@@ -37,8 +37,15 @@
               </div>
   		</div>
 	</form>
-  
+
     <h1 align="center"></h1>
+    <h1 align="center"></h1>
+    {% if results %}
+    <h1 align="center">{{claim}}</h1>
+        <h1 align="center"></h1>
+    <h1 align="center"></h1>
+    {% endif %}
+
 
 	<div class="col-sm-12">
         {% if results %}
@@ -70,19 +77,21 @@
     <div class="container" align="center">
     <canvas id="myChart" width="500" height="500"></canvas>
     </div>
+    {% if results %}
     <script>
             window.onload = function() {
                 var ctx = document.getElementById('myChart').getContext('2d');
     var myChart = new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: ['Supports', 'Not enough info', 'Refutes'],
+            labels: ['Supports', 'Refutes', 'Not enough info'],
             datasets: [{
-                data: [5, 15, 2],
+                data: {{vals}},
                 backgroundColor: [
                 "#00C851",
-                "#ffbb33",
-                "#ff4444"
+                "#ff4444",
+                "#ffbb33"
+
                 ],
                 borderColor: [
                 '#1C2331',
@@ -122,6 +131,7 @@
     });
             };
     </script>
+{% endif %}
 
 </body>
 </html>

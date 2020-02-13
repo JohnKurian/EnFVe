@@ -494,9 +494,10 @@ def get_results(claim):
             print('claim_batch:', claim_batch.shape)
             outputs = gear_model(feature_batch, claim_batch)
             print('outputs:', outputs)
+            vals = [abs(1/x) for x in np.array(outputs).tolist()[0]]
             argmax = np.argmax(outputs.numpy())
             print('v:', argmax)
-            return argmax, answer_list
+            return argmax, answer_list, vals
 
     print("--- %.3f seconds for gear inference ---" % (time.time() - start_time))
 
@@ -506,6 +507,7 @@ app = Flask(__name__)
 def hello():
     errors = []
     evidences = []
+    vals = []
     results = {}
     prediction_result = ''
     claim = ''
@@ -515,10 +517,10 @@ def hello():
         try:
             claim = request.form['url']
             print(claim)
-            argmax, evidences = get_results(claim)
+            argmax, evidences, vals = get_results(claim)
             prediction_result = result_names[argmax]
         except:
             errors.append(
                 "Unable to get URL. Please make sure it's valid and try again."
             )
-    return render_template('test.html', errors=errors, results=evidences, prediction_result = prediction_result, claim=claim)
+    return render_template('test.html', errors=errors, results=evidences, prediction_result = prediction_result, claim=claim, vals=vals)

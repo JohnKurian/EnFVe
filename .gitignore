@@ -1,0 +1,6 @@
+/BERT-Pair/*
+/gear-model/*
+/albert_base_v1/
+.idea
+.DS_Store
+__pycache__/*

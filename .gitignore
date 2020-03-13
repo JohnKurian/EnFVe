@@ -4,3 +4,5 @@
 .idea
 .DS_Store
 __pycache__/*
+/transformer_xh_model/model_finetuned_epoch_0.pt
+/fnc_ucnlp/fnc/*

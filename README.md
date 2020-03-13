@@ -1,5 +1,9 @@
 How to run
-env FLASK_APP=server.py flask run
+env FLASK_APP=server.py flask run -p 6000
+
+Virtual env
+virtualenv mypython
+source mypython/bin/activate
 ## GEAR
 
 Source code and dataset for the ACL 2019 paper "[GEAR: Graph-based Evidence Aggregating and Reasoning for Fact Verification](GEAR.pdf)".

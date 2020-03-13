@@ -167,6 +167,14 @@ optimizer = optim.Adam(gear_model.parameters(),
 checkpoint = torch.load(base_dir + 'best.pth.tar', map_location=torch.device('cpu'))
 gear_model.load_state_dict(checkpoint['model'])
 
+
+c_gear_model = GEAR(nfeat=768, nins=5, nclass=3, nlayer=1, pool='att')
+optimizer = optim.Adam(c_gear_model.parameters(),
+                       lr=0.005,
+                       weight_decay=5e-4)
+checkpoint = torch.load(base_dir + 'contradiction_best.pth.tar', map_location=torch.device('cpu'))
+c_gear_model.load_state_dict(checkpoint['model'])
+
 print('input data received.')
 input_data = {
     'claim': 'The Silence of the Lambs is a American film directed by Jonathan Demme and starring Jodie Foster.',
@@ -294,7 +302,9 @@ with torch.no_grad():
         print('feature_batch:', feature_batch.shape)
         print('claim_batch:', claim_batch.shape)
         outputs = gear_model(feature_batch, claim_batch)
+        c_outputs = c_gear_model(feature_batch, claim_batch)
         print('outputs:', outputs)
+        print('c_outputs:', c_outputs)
 
 
 print("--- %.3f seconds for gear inference ---" % (time.time() - start_time))

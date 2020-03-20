@@ -40,6 +40,8 @@ from annoy import AnnoyIndex
 
 import wikipediaapi
 
+from spacy.lang.en import English
+
 from serpwow.google_search_results import GoogleSearchResults
 import json
 
@@ -66,6 +68,20 @@ import logging
 from tqdm import tqdm
 
 import json
+
+import torch
+from fairseq.data.data_utils import collate_tokens
+
+
+print('loading roberta model..')
+roberta = torch.hub.load('pytorch/fairseq', 'roberta.large.mnli')
+
+
+from sentence_transformers import SentenceTransformer
+print('loading distil bert siamese embedder...')
+embedder = SentenceTransformer('distilbert-base-nli-stsb-mean-tokens')
+
+from scipy import spatial
 
 
 algo = 'TXH'
@@ -633,25 +649,7 @@ model.load('transformer_xh_model/model_finetuned_epoch_0.pt')
 config = json.load(open('configs/config_fever.json', 'r', encoding="utf-8"))
 
 
-def get_evidences_es(claim):
-    res = s.search(index="wikipedia_en", size=5, body={"query": {
-        "match": {
-            "text": {
-                "query": claim
-            }
-        }}})
-
-    print("Got %d Hits:" % res['hits']['total']['value'])
-    search_list = []
-    result_list = []
-    answer_list = []
-    for hit in res['hits']['hits']:
-        answer_list.append(hit["_source"]['text'])
-        print(hit["_source"]['text'])
-        print('\n\n')
-    return answer_list
-
-def get_evidences(claim):
+def doc_retrieval(claim):
     # claim = 'Modi is the president of India'
 
     # claim = 'Modi is the president of India in 1992'
@@ -787,16 +785,81 @@ def get_evidences(claim):
     for result in wiki_results:
         try:
             p = wiki_wiki.page(result).text
-            lines = p.split('\n')
-            for line in lines:
-                line.replace('\\', '')
-                if not line.startswith('==') and len(line) > 60:
-                    line = nltk.sent_tokenize(line)
-                    filtered_lines.extend(line)
+            # p = p.replace('\n', ' ')
+            # p = p.replace('\t', ' ')
+            # filtered_lines = nltk.sent_tokenize(p)
+            # filtered_lines = [line for line in filtered_lines if not line.startswith('==') and len(line) > 10 ]
+
+            # Load English tokenizer, tagger, parser, NER and word vectors
+            nlp = English()
+            # Create the pipeline 'sentencizer' component
+            sbd = nlp.create_pipe('sentencizer')
+            # Add the component to the pipeline
+            nlp.add_pipe(sbd)
+            text = p
+            #  "nlp" Object is used to create documents with linguistic annotations.
+            doc = nlp(text)
+            # create list of sentence tokens
+            filtered_lines = []
+            for sent in doc.sents:
+                txt = sent.text
+                # txt = txt.replace('\n', '')
+                # txt = txt.replace('\t', '')
+                filtered_lines.append(txt)
+
+        #     lines = p.split('\n')
+        #     for line in lines:
+        #         line.replace('\\', '')
+        #         if not line.startswith('==') and len(line) > 60:
+        #             line = nltk.sent_tokenize(line)
+        #             filtered_lines.extend(line)
         except:
             print('error')
 
-    print('filtered_lines:', filtered_lines)
+    print('filtered_lines:', len(filtered_lines))
+    return filtered_lines
+
+
+
+def get_evidences_es(claim):
+    res = s.search(index="wikipedia_en", size=5, body={"query": {
+        "match": {
+            "text": {
+                "query": claim
+            }
+        }}})
+
+    print("Got %d Hits:" % res['hits']['total']['value'])
+    search_list = []
+    result_list = []
+    answer_list = []
+    for hit in res['hits']['hits']:
+        answer_list.append(hit["_source"]['text'])
+        print(hit["_source"]['text'])
+        print('\n\n')
+    return answer_list
+
+def get_evidences_siamese_distilbert(claim):
+
+    # Corpus with example sentences
+    evidences = doc_retrieval(claim)
+    evidence_embeddings = embedder.encode(evidences)
+
+    claim_embedding = embedder.encode(claim)
+
+    distances = spatial.distance.cdist(claim_embedding, evidence_embeddings, "cosine")
+
+    ranked_sentences = [evidences[index] for index in list(distances[0].argsort())]
+    ranked_sentences = ranked_sentences[:5]
+    print(ranked_sentences)
+
+    return ranked_sentences
+
+    # query_embeddings = embedder.encode(queries)
+
+def get_evidences_use_annoy(claim):
+
+    filtered_lines = doc_retrieval(claim)
 
 
     # filtered_lines = [x for x in filtered_lines if len(x)>60]
@@ -1009,6 +1072,40 @@ def get_results_gear(claim, answer_list):
 def get_stances_ucnlp(claim, evidences):
     return requests.post('http://127.0.0.1:6000', json={'claim': claim, 'evidences': evidences})
 
+def get_roberta_preds(claim, evidences):
+    batch_of_pairs = [[claim, evidence] for evidence in evidences]
+
+    # batch_of_pairs = [
+    #     ['Roberta is a heavily optimized version of BERT.', 'Roberta is not very optimized.'],
+    #     ['Roberta is a heavily optimized version of BERT.', 'Roberta is based on BERT.'],
+    #     ['potatoes are awesome.', 'I like to run.'],
+    #     ['Mars is very far from earth.', 'Mars is very close.'],
+    #     ['Roberta is a heavily optimized version of BERT.', 'Roberta is not very optimized.'],
+    #     ['Roberta is a heavily optimized version of BERT.', 'Roberta is based on BERT.'],
+    #     ['potatoes are awesome.', 'I like to run.'],
+    #     ['Mars is very far from earth.', 'Mars is very close.'],
+    #     ['Roberta is a heavily optimized version of BERT.', 'Roberta is not very optimized.'],
+    #     ['Roberta is a heavily optimized version of BERT.', 'Roberta is based on BERT.']
+    # ]
+
+    batch = collate_tokens(
+        [roberta.encode(pair[0], pair[1]) for pair in batch_of_pairs], pad_idx=1
+    )
+
+    logprobs = roberta.predict('mnli', batch)
+
+    pred_dict = {
+        0: 'contradiction',
+        1: 'neutral',
+        2: 'entailment'
+    }
+    pred_indices = logprobs.argmax(dim=1).tolist()
+    preds = [pred_dict[i] for i in pred_indices]
+    print(preds)
+    return preds
+
+
+
 app = Flask(__name__)
 
 @app.route('/', methods=['GET', 'POST'])
@@ -1025,13 +1122,16 @@ def hello():
         try:
             claim = request.form['url']
             print(claim)
-            evidences = get_evidences(claim)
-            argmax, evidences, vals = get_results_gear(claim, evidences)
-            print('gear results:', argmax, vals)
+            evidences = get_evidences_use_annoy(claim)
             stances = get_stances_ucnlp(claim, evidences)
-            print('unc results:', stances.json())
+            stances = stances.json()
+            roberta_preds = get_roberta_preds(claim, evidences)
+            argmax, evidences, vals = get_results_gear(claim, evidences)
             argmax, evidences, vals = get_results_transformer_xh(claim, evidences)
+            print('gear results:', argmax, vals)
             print('transformer xh results:', argmax, vals)
+            print('unc results:', stances)
+            print('roberta results:', roberta_preds)
             prediction_result = result_names[argmax]
         except:
             errors.append(

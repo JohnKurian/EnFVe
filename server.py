@@ -565,6 +565,7 @@ def evaluation_fever(model, config, tokenizer, json_obj, inference=False):
     count = 0
     pred_dict = dict()
     logits_score = []
+    final_score = []
 
     for batch in tqdm(dataloader):
         print('batch:', batch)
@@ -592,10 +593,12 @@ def evaluation_fever(model, config, tokenizer, json_obj, inference=False):
 
         print('final score:', index[0].item())
 
+        final_score = final_score.tolist()
+
 
         pred_dict = index[0].item()
 
-    return pred_dict, logits_score
+    return pred_dict, logits_score, final_score
 
 
 
@@ -629,12 +632,12 @@ checkpoint = torch.load(base_dir + 'best.pth.tar', map_location=torch.device('cp
 gear_model.load_state_dict(checkpoint['model'])
 
 
-c_gear_model = GEAR(nfeat=768, nins=5, nclass=2, nlayer=1, pool='att')
-optimizer = optim.Adam(c_gear_model.parameters(),
-                       lr=0.005,
-                       weight_decay=5e-4)
-checkpoint = torch.load(base_dir + 'contradiction_best.pth.tar', map_location=torch.device('cpu'))
-c_gear_model.load_state_dict(checkpoint['model'])
+# c_gear_model = GEAR(nfeat=768, nins=5, nclass=2, nlayer=1, pool='att')
+# optimizer = optim.Adam(c_gear_model.parameters(),
+#                        lr=0.005,
+#                        weight_decay=5e-4)
+# checkpoint = torch.load(base_dir + 'contradiction_best.pth.tar', map_location=torch.device('cpu'))
+# c_gear_model.load_state_dict(checkpoint['model'])
 
 
 
@@ -782,39 +785,54 @@ def doc_retrieval(claim):
     filtered_lines = []
     print('looping...')
     print(wiki_results)
+
     for result in wiki_results:
         try:
             p = wiki_wiki.page(result).text
-            # p = p.replace('\n', ' ')
-            # p = p.replace('\t', ' ')
-            # filtered_lines = nltk.sent_tokenize(p)
-            # filtered_lines = [line for line in filtered_lines if not line.startswith('==') and len(line) > 10 ]
-
-            # Load English tokenizer, tagger, parser, NER and word vectors
-            nlp = English()
-            # Create the pipeline 'sentencizer' component
-            sbd = nlp.create_pipe('sentencizer')
-            # Add the component to the pipeline
-            nlp.add_pipe(sbd)
-            text = p
-            #  "nlp" Object is used to create documents with linguistic annotations.
-            doc = nlp(text)
-            # create list of sentence tokens
-            filtered_lines = []
-            for sent in doc.sents:
-                txt = sent.text
-                # txt = txt.replace('\n', '')
-                # txt = txt.replace('\t', '')
-                filtered_lines.append(txt)
-
-        #     lines = p.split('\n')
-        #     for line in lines:
-        #         line.replace('\\', '')
-        #         if not line.startswith('==') and len(line) > 60:
-        #             line = nltk.sent_tokenize(line)
-        #             filtered_lines.extend(line)
+            lines = p.split('\n')
+            for line in lines:
+                line.replace('\\', '')
+                if not line.startswith('==') and len(line) > 60:
+                    line = nltk.sent_tokenize(line)
+                    filtered_lines.extend(line)
         except:
             print('error')
+
+    print('filtered_lines:', filtered_lines)
+
+    # for result in wiki_results:
+    #     try:
+    #         p = wiki_wiki.page(result).text
+    #         # p = p.replace('\n', ' ')
+    #         # p = p.replace('\t', ' ')
+    #         # filtered_lines = nltk.sent_tokenize(p)
+    #         # filtered_lines = [line for line in filtered_lines if not line.startswith('==') and len(line) > 10 ]
+    #
+    #         # Load English tokenizer, tagger, parser, NER and word vectors
+    #         nlp = English()
+    #         # Create the pipeline 'sentencizer' component
+    #         sbd = nlp.create_pipe('sentencizer')
+    #         # Add the component to the pipeline
+    #         nlp.add_pipe(sbd)
+    #         text = p
+    #         #  "nlp" Object is used to create documents with linguistic annotations.
+    #         doc = nlp(text)
+    #         # create list of sentence tokens
+    #         filtered_lines = []
+    #         for sent in doc.sents:
+    #             txt = sent.text
+    #             # txt = txt.replace('\n', '')
+    #             # txt = txt.replace('\t', '')
+    #             filtered_lines.append(txt)
+    #
+    #     #     lines = p.split('\n')
+    #     #     for line in lines:
+    #     #         line.replace('\\', '')
+    #     #         if not line.startswith('==') and len(line) > 60:
+    #     #             line = nltk.sent_tokenize(line)
+    #     #             filtered_lines.extend(line)
+    #     except:
+    #         print('error')
 
     print('filtered_lines:', len(filtered_lines))
     return filtered_lines
@@ -957,10 +975,12 @@ def get_results_transformer_xh(claim, evidences):
     print('json batch:', json_batch)
 
     print('im also here')
-    pred_dict, logits_score = evaluation_fever(model, config, tokenizer, json_batch, False)
+    pred_dict, logits_score, final_score = evaluation_fever(model, config, tokenizer, json_batch, False)
     logits_score = logits_score.tolist()
 
-    return logits_score, evidences, logits_score
+    argmax = np.argmax(final_score)
+
+    return argmax, evidences, final_score
 
 
 
@@ -1116,23 +1136,28 @@ def hello():
     results = {}
     prediction_result = ''
     claim = ''
-    result_names = ['True', 'Refutes', 'Not enough info']
+    gear_result_names = ['True', 'Refutes', 'Not enough info']
+    txh_result_names = ['Not enough info', 'refutes', 'supports']
+
+    txh_argmax = [2,1,0]
+
     if request.method == "POST":
         # get url that the user has entered
         try:
             claim = request.form['url']
             print(claim)
             evidences = get_evidences_use_annoy(claim)
-            stances = get_stances_ucnlp(claim, evidences)
-            stances = stances.json()
+            # stances = get_stances_ucnlp(claim, evidences)
+            # stances = stances.json()
             roberta_preds = get_roberta_preds(claim, evidences)
             argmax, evidences, vals = get_results_gear(claim, evidences)
-            argmax, evidences, vals = get_results_transformer_xh(claim, evidences)
             print('gear results:', argmax, vals)
-            print('transformer xh results:', argmax, vals)
-            print('unc results:', stances)
+            # argmax, evidences, vals = get_results_transformer_xh(claim, evidences)
+            # argmax = [txh_argmax[i] for i in argmax]
+            # print('transformer xh results:', argmax, vals)
+            # print('unc results:', stances)
             print('roberta results:', roberta_preds)
-            prediction_result = result_names[argmax]
+            prediction_result = gear_result_names[argmax]
         except:
             errors.append(
                 "Unable to get URL. Please make sure it's valid and try again."

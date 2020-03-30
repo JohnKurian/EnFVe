@@ -1179,10 +1179,12 @@ def get_evidences_esim(claim):
     tf.reset_default_graph()
 
     ep = [value[0] for value in ensembled_predicitons[0]]
-    idx = (-np.array(ep)).argsort()[:5]
+    idx = (-np.array(ep)).argsort()[:50]
     evidences = [tests[i] for i in idx]
+    evidences = [evidence[1] for evidence in evidences]
+    evidences = list(dict.fromkeys(evidences))
     print("\nEvidences")
-    return [evidence[1] for evidence in evidences]
+    return evidences[:5]
 
 def get_evidences_serpwow(claim):
     # location

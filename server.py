@@ -840,6 +840,69 @@ def doc_retrieval(claim):
     return filtered_lines
 
 
+def doc_retrieval_only_pages(claim):
+
+  def get_NP(tree, nps):
+
+        if isinstance(tree, dict):
+            if "children" not in tree:
+                if tree['nodeType'] == "NP":
+                    # print(tree['word'])
+                    # print(tree)
+                    nps.append(tree['word'])
+            elif "children" in tree:
+                if tree['nodeType'] == "NP":
+                    # print(tree['word'])
+                    nps.append(tree['word'])
+                    get_NP(tree['children'], nps)
+                else:
+                    get_NP(tree['children'], nps)
+        elif isinstance(tree, list):
+            for sub_tree in tree:
+                get_NP(sub_tree, nps)
+
+        return nps
+
+  def get_subjects(tree):
+      subject_words = []
+      subjects = []
+      for subtree in tree['children']:
+          if subtree['nodeType'] == "VP" or subtree['nodeType'] == 'S' or subtree['nodeType'] == 'VBZ':
+              subjects.append(' '.join(subject_words))
+              subject_words.append(subtree['word'])
+          else:
+              subject_words.append(subtree['word'])
+      return subjects
+
+  tokens = predictor.predict(claim)
+  nps = []
+  tree = tokens['hierplane_tree']['root']
+  noun_phrases = get_NP(tree, nps)
+
+  subjects = get_subjects(tree)
+  for subject in subjects:
+      if len(subject) > 0:
+          noun_phrases.append(subject)
+
+  predicted_pages = []
+  if len(noun_phrases) == 1:
+      for np in noun_phrases:
+          if len(np) > 300:
+              continue
+          docs = wikipedia.search(np)
+          predicted_pages.extend(docs[:2])  # threshold
+
+  else:
+      for np in noun_phrases:
+          if len(np) > 300:
+              continue
+          docs = wikipedia.search(np)
+          predicted_pages.extend(docs[:1])
+
+  wiki_results = list(predicted_pages)
+  
+  return wiki_results
+
 
 def get_evidences_es(claim):
     res = s.search(index="wikipedia_en", size=5, body={"query": {
@@ -908,132 +971,10 @@ def get_evidences_use_annoy(claim):
     print('similar lines:', similar_lines)
     return similar_lines
 
-def get_evidences_esim(claim, fasttext_model):
-    def get_NP(tree, nps):
+def get_evidences_esim(claim):
+    
+    documents = doc_retrieval_only_pages(claim)
 
-        if isinstance(tree, dict):
-            if "children" not in tree:
-                if tree['nodeType'] == "NP":
-                    # print(tree['word'])
-                    # print(tree)
-                    nps.append(tree['word'])
-            elif "children" in tree:
-                if tree['nodeType'] == "NP":
-                    # print(tree['word'])
-                    nps.append(tree['word'])
-                    get_NP(tree['children'], nps)
-                else:
-                    get_NP(tree['children'], nps)
-        elif isinstance(tree, list):
-            for sub_tree in tree:
-                get_NP(sub_tree, nps)
-
-        return nps
-
-    def get_subjects(tree):
-        subject_words = []
-        subjects = []
-        for subtree in tree['children']:
-            if subtree['nodeType'] == "VP" or subtree['nodeType'] == 'S' or subtree['nodeType'] == 'VBZ':
-                subjects.append(' '.join(subject_words))
-                subject_words.append(subtree['word'])
-            else:
-                subject_words.append(subtree['word'])
-        return subjects
-
-    # predictor.predict(claim)
-    tokens = predictor.predict(claim)
-    nps = []
-    tree = tokens['hierplane_tree']['root']
-    # print(tree)
-    noun_phrases = get_NP(tree, nps)
-
-    subjects = get_subjects(tree)
-    for subject in subjects:
-        if len(subject) > 0:
-            noun_phrases.append(subject)
-    # noun_phrases = list(set(noun_phrases))
-
-    predicted_pages = []
-    if len(noun_phrases) == 1:
-        for np in noun_phrases:
-            if len(np) > 300:
-                continue
-            docs = wikipedia.search(np)
-
-            predicted_pages.extend(docs[:2])  # threshold
-
-    else:
-        for np in noun_phrases:
-            if len(np) > 300:
-                continue
-            docs = wikipedia.search(np)
-
-            predicted_pages.extend(docs[:1])
-
-    wiki_results = set(predicted_pages)
-
-    # wiki_results = []
-    # for page in predicted_pages:
-    #     page = page.replace(" ", "_")
-    #     page = page.replace("(", "-LRB-")
-    #     page = page.replace(")", "-RRB-")
-    #     page = page.replace(":", "-COLON-")
-    #     wiki_results.append(page)
-    # print(wiki_results)
-
-    noun_phrases = set(noun_phrases)
-    f_predicted_pages = []
-    for np in noun_phrases:
-        page = np.replace('( ', '-LRB-')
-        page = page.replace(' )', '-RRB-')
-        page = page.replace(' - ', '-')
-        page = page.replace(' -', '-')
-        page = page.replace(' :', '-COLON-')
-        page = page.replace(' ,', ',')
-        page = page.replace(" 's", "'s")
-        page = page.replace(' ', '_')
-
-        if len(page) < 1:
-            continue
-        f_predicted_pages.append(page)
-
-    noun_phrases = list(set(noun_phrases))
-
-    wiki_results = list(set(wiki_results))
-
-    # stop_words = set(stopwords.words('english'))
-    # wiki_results = [w for w in wiki_results if not w in stop_words]
-
-    claim = normalize(claim)
-    claim = claim.replace(".", "")
-    claim = claim.replace("-", " ")
-    proter_stemm = nltk.PorterStemmer()
-    tokenizer = nltk.word_tokenize
-    words = [proter_stemm.stem(word.lower()) for word in tokenizer(claim)]
-    words = set(words)
-
-    for page in wiki_results:
-        page = normalize(page)
-        processed_page = re.sub("-LRB-.*?-RRB-", "", page)
-        processed_page = re.sub("_", " ", processed_page)
-        processed_page = re.sub("-COLON-", ":", processed_page)
-        processed_page = processed_page.replace("-", " ")
-        processed_page = processed_page.replace("–", " ")
-        processed_page = processed_page.replace(".", "")
-        page_words = [proter_stemm.stem(word.lower()) for word in tokenizer(processed_page) if
-                        len(word) > 0]
-
-        if all([item in words for item in page_words]):
-            if ':' in page:
-                page = page.replace(":", "-COLON-")
-            f_predicted_pages.append(normalize(page))
-    f_predicted_pages = list(set(f_predicted_pages))
-
-    # print(f'Search Entities: {noun_phrases}')
-    print(f'Articles Retrieved: {wiki_results}')
-
-    # print(f'Predicted Retrievals: {f_predicted_pages}')
     def get_words(claims, sents):
 
         words = set()
@@ -1170,7 +1111,7 @@ def get_evidences_esim(claim, fasttext_model):
 
     tests = []
     test_location_indexes = []
-    pages = set(wiki_results)
+    pages = set(documents)
     p_lines = []
     doc_lines = []
     for page in pages:
@@ -1213,7 +1154,7 @@ def get_evidences_esim(claim, fasttext_model):
     embed_dict = {}
     
     for word, key in iword_dict.items():
-        embed_dict[key] = fasttext_model[word]
+        embed_dict[key] = model[word]
         
     print('Embedding size: %d' % (len(embed_dict)))
 
@@ -1240,7 +1181,7 @@ def get_evidences_esim(claim, fasttext_model):
     ep = [value[0] for value in ensembled_predicitons[0]]
     idx = (-np.array(ep)).argsort()[:5]
     evidences = [tests[i] for i in idx]
-
+    print("\nEvidences")
     return [evidence[1] for evidence in evidences]
 
 def get_evidences_serpwow(claim):

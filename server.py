@@ -28,6 +28,7 @@ import json
 import os
 import re
 import nltk
+from nltk.tokenize import sent_tokenize
 from nltk.corpus import stopwords
 import wikipedia
 from allennlp.predictors.predictor import Predictor
@@ -44,9 +45,9 @@ from spacy.lang.en import English
 
 from serpwow.google_search_results import GoogleSearchResults
 import json
+from pyfasttext import FastText
 
-
-
+from ESIM import ESIM
 
 
 import torch.nn.functional as F
@@ -112,6 +113,7 @@ NUM_TREES=50
 nltk.download('punkt')
 
 predictor = Predictor.from_path("https://s3-us-west-2.amazonaws.com/allennlp/models/elmo-constituency-parser-2018.03.14.tar.gz")
+model = FastText("wiki.en.bin")
 
 s = es.Elasticsearch([{'host': 'localhost', 'port': 9200}])
 
@@ -838,6 +840,69 @@ def doc_retrieval(claim):
     return filtered_lines
 
 
+def doc_retrieval_only_pages(claim):
+
+  def get_NP(tree, nps):
+
+        if isinstance(tree, dict):
+            if "children" not in tree:
+                if tree['nodeType'] == "NP":
+                    # print(tree['word'])
+                    # print(tree)
+                    nps.append(tree['word'])
+            elif "children" in tree:
+                if tree['nodeType'] == "NP":
+                    # print(tree['word'])
+                    nps.append(tree['word'])
+                    get_NP(tree['children'], nps)
+                else:
+                    get_NP(tree['children'], nps)
+        elif isinstance(tree, list):
+            for sub_tree in tree:
+                get_NP(sub_tree, nps)
+
+        return nps
+
+  def get_subjects(tree):
+      subject_words = []
+      subjects = []
+      for subtree in tree['children']:
+          if subtree['nodeType'] == "VP" or subtree['nodeType'] == 'S' or subtree['nodeType'] == 'VBZ':
+              subjects.append(' '.join(subject_words))
+              subject_words.append(subtree['word'])
+          else:
+              subject_words.append(subtree['word'])
+      return subjects
+
+  tokens = predictor.predict(claim)
+  nps = []
+  tree = tokens['hierplane_tree']['root']
+  noun_phrases = get_NP(tree, nps)
+
+  subjects = get_subjects(tree)
+  for subject in subjects:
+      if len(subject) > 0:
+          noun_phrases.append(subject)
+
+  predicted_pages = []
+  if len(noun_phrases) == 1:
+      for np in noun_phrases:
+          if len(np) > 300:
+              continue
+          docs = wikipedia.search(np)
+          predicted_pages.extend(docs[:2])  # threshold
+
+  else:
+      for np in noun_phrases:
+          if len(np) > 300:
+              continue
+          docs = wikipedia.search(np)
+          predicted_pages.extend(docs[:1])
+
+  wiki_results = list(predicted_pages)
+  
+  return wiki_results
+
 
 def get_evidences_es(claim):
     res = s.search(index="wikipedia_en", size=5, body={"query": {
@@ -909,7 +974,220 @@ def get_evidences_use_annoy(claim):
     print('similar lines:', similar_lines)
     return similar_lines
 
+def get_evidences_esim(claim):
+    
+    documents = doc_retrieval_only_pages(claim)
 
+    def get_words(claims, sents):
+
+        words = set()
+        for claim in claims:
+            # print(claim)
+            for idx, word in enumerate(nltk.word_tokenize(claim)):
+                if idx >= 20:
+                    break
+                words.add(word.lower())
+                # print(words)
+        for sent in sents:
+            # print(sent)
+            for idx, word in enumerate(nltk.word_tokenize(sent)):
+                if idx >= 20:
+                    break
+                words.add(word.lower())
+                # print(words)
+        return words
+
+    def get_predict_words(devs):
+
+        dev_words = set()
+        
+        for dev in tqdm(devs):
+            claims = set()
+            sents = []
+            # for pair in dev:
+            claims.add(dev[0])
+            sents.append(dev[1])
+            dev_tokens = get_words(claims, sents)
+            dev_words.update(dev_tokens)
+        print("words processing done!")
+        return dev_words
+
+    def word_2_dict(words):
+
+        word_dict = {}
+        for idx, word in enumerate(words):
+            word = word.replace('\n', '')
+            word = word.replace('\t', '')
+            word_dict[idx] = word
+
+        return word_dict
+
+    def get_complete_words(dev_data):
+
+        all_words = set()
+        dev_words = get_predict_words(dev_data)
+        # print(dev_words)
+        all_words.update(dev_words)
+        # print(all_words)
+        word_dict = word_2_dict(all_words)
+        print("Word Dict created")
+        return word_dict
+
+    def inverse_word_dict(word_dict):
+
+        iword_dict = {}
+        for key, word in tqdm(word_dict.items()):
+            iword_dict[word] = key
+        return iword_dict
+
+    def sent_2_index(sent, i_word_dict, max_length):
+        words = nltk.word_tokenize(sent)
+        word_indexes = []
+        for idx, word in enumerate(words):
+            if idx >= max_length:
+                break
+            else:
+                word_indexes.append(i_word_dict[word.lower()])
+        return word_indexes
+    
+    def predict_data_indexes(data, word_dict):
+
+        test_indexes = []
+        
+        sent_indexes = []
+        claim = tests[0][0]
+        claim_index = sent_2_index(claim, word_dict, 20)
+        claim_indexes = [claim_index] * len(data)
+        
+        for claim, sent in data:
+            sent_index = sent_2_index(sent, word_dict, 20)
+            sent_indexes.append(sent_index)
+
+        assert len(sent_indexes) == len(claim_indexes)
+        test_indexes = list(zip(claim_indexes, sent_indexes))
+        test_indexes.append(test_indexes)
+        print("Indexes created")
+        return test_indexes[:-1]
+
+    def embed_to_numpy(embed_dict):
+
+        feat_size = len(embed_dict[list(embed_dict.keys())[0]])
+        embed = np.zeros((len(embed_dict) + 1, feat_size), np.float32)
+        for k in embed_dict:
+            embed[k] = np.asarray(embed_dict[k])
+        print('Generate numpy embed:', embed.shape)
+
+        return embed
+
+    def softmax(prediction):
+        theta = 2.0
+        ps = np.exp(prediction * theta)
+        ps /= np.sum(ps)
+        return ps
+
+    def averaging(predictions):
+        processed_predictions = []
+        for prediction in predictions:
+            prediction = np.asarray(prediction)
+            prediction = softmax(prediction)
+            processed_predictions.append(prediction)
+        processed_predictions = np.asarray(processed_predictions)
+        final_prediction = np.mean(processed_predictions, axis=0, keepdims=False)
+
+        return final_prediction
+
+
+    def scores_processing(all_predictions):
+        ensembled_predictions = []
+        for i in range(len(all_predictions[0])):
+            predictions = []
+            for j in range(len(all_predictions)):
+                predictions.append(all_predictions[j][i])
+                # print(predictions)
+            ensembled_prediction = averaging(predictions)
+            ensembled_predictions.append(ensembled_prediction)
+        return ensembled_predictions
+
+
+    
+    wiki_wiki = wikipediaapi.Wikipedia(language='en', extract_format=wikipediaapi.ExtractFormat.WIKI)
+
+    tests = []
+    test_location_indexes = []
+    pages = set(documents)
+    p_lines = []
+    doc_lines = []
+    for page in pages:
+        if wiki_wiki.page(page).exists():
+            p = wiki_wiki.page(page).text
+            lines = p.split('\n')
+            for line in lines:
+                line.replace('\\', '')
+                if not line.startswith('==') and len(line) > 60:
+                    line = nltk.sent_tokenize(line)
+                    doc_lines.extend(line)
+            
+            if not doc_lines:
+                return []
+            document_lines = list(zip(doc_lines, [page] * len(doc_lines), range(len(doc_lines))))
+            p_lines.extend(document_lines)
+        # print(p_lines)
+
+    for doc_line in p_lines:
+        if not doc_line[0]:
+            continue
+        tests.append((claim, doc_line[0]))
+        
+        test_location_indexes.append((doc_line[1], doc_line[2]))
+        
+
+    if len(tests) == 0:
+        tests.append((claim, 'no evidence for this claim'))
+        test_location_indexes.append(('empty', 0))
+
+
+    word_dict = get_complete_words(tests)
+    iword_dict = inverse_word_dict(word_dict)
+
+    _PAD_ = len(word_dict)
+    word_dict[_PAD_] = '[PAD]'
+    iword_dict['[PAD]'] = _PAD_
+    test_indexes = predict_data_indexes(tests, iword_dict)
+
+    embed_dict = {}
+    
+    for word, key in iword_dict.items():
+        embed_dict[key] = model[word]
+        
+    print('Embedding size: %d' % (len(embed_dict)))
+
+
+    embed = embed_to_numpy(embed_dict)
+
+    clf = ESIM(h_max_length=20, s_max_length=20, learning_rate=0.001, batch_size=256, num_epoch=20,
+                        model_store_dir="/esim_pretrained_model", embedding=embed, word_dict=iword_dict,
+                        dropout_rate=0.2, random_state=88, num_units=128, activation=tf.nn.relu, share_rnn=True)
+
+    clf.restore_model("best_model.ckpt")
+
+    all_predictions = []
+    predictions = []
+    # for test_index in tqdm(test_indexes):
+    prediction = clf.predict(test_indexes)
+    predictions.append(prediction)
+    all_predictions.append(predictions)
+
+    ensembled_predicitons = scores_processing(all_predictions)
+
+    tf.reset_default_graph()
+
+    ep = [value[0] for value in ensembled_predicitons[0]]
+    idx = (-np.array(ep)).argsort()[:50]
+    evidences = [tests[i] for i in idx]
+    evidences = [evidence[1] for evidence in evidences]
+    evidences = list(dict.fromkeys(evidences))
+    print("\nEvidences")
+    return evidences[:5]
 
 def get_evidences_serpwow(claim):
     # location

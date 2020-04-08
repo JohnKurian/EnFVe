@@ -886,21 +886,24 @@ def get_evidences_use_annoy(claim):
     embeddings = use_model(filtered_lines)
     print(embeddings)
 
-    ann = AnnoyIndex(D)
-
-    for index, embed in enumerate(embeddings):
-        ann.add_item(index, embed)
-    ann.build(NUM_TREES)
-
     claim_embedding = use_model([claim])
 
-    # nns = ann.get_nns_by_vector(claim_embedding[0], 10)
-    #
-    # similar_lines = [filtered_lines[i] for i in nns]
-    # similar_lines = [similar_lines[i] + ' ' + similar_lines[i+1] for i in range(0,10,2)]
-    # print('similar lines:', similar_lines)
+    print('numpy distance..')
 
-    nns = ann.get_nns_by_vector(claim_embedding[0], 5)
+    distances = [np.linalg.norm(a - claim_embedding) for a in embeddings]
+    idxs = np.argsort(distances)[::-1][-5:]
+    nns = idxs.tolist()
+
+    nns.reverse()
+
+
+    # ann = AnnoyIndex(D)
+    #
+    # for index, embed in enumerate(embeddings):
+    #     ann.add_item(index, embed)
+    # ann.build(NUM_TREES)
+    #
+    # nns = ann.get_nns_by_vector(claim_embedding[0], 5)
 
     similar_lines = [filtered_lines[i] for i in nns]
     print('similar lines:', similar_lines)
@@ -991,6 +994,8 @@ def get_results_gear(claim, answer_list):
         'claim': claim,
         'evidences': answer_list
     }
+
+    print('input data:', input_data)
 
     # input_data = {
     #     'claim': 'Jim is born in Brazil.',
@@ -1149,14 +1154,14 @@ def hello():
             evidences = get_evidences_use_annoy(claim)
             # stances = get_stances_ucnlp(claim, evidences)
             # stances = stances.json()
-            roberta_preds = get_roberta_preds(claim, evidences)
+            # roberta_preds = get_roberta_preds(claim, evidences)
             argmax, evidences, vals = get_results_gear(claim, evidences)
             print('gear results:', argmax, vals)
             # argmax, evidences, vals = get_results_transformer_xh(claim, evidences)
             # argmax = [txh_argmax[i] for i in argmax]
             # print('transformer xh results:', argmax, vals)
             # print('unc results:', stances)
-            print('roberta results:', roberta_preds)
+            # print('roberta results:', roberta_preds)
             prediction_result = gear_result_names[argmax]
         except:
             errors.append(

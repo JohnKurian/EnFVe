@@ -1,12 +1,12 @@
-How to run
-env FLASK_APP=server.py flask run -p 6000
+## How to run
 
-Virtual env
-virtualenv mypython
-source mypython/bin/activate
-## GEAR
+cd to fnc_ucnlp folder
+Create a virtual environment fnc in it and then install from requirements.txt
 
-Source code and dataset for the ACL 2019 paper "[GEAR: Graph-based Evidence Aggregating and Reasoning for Fact Verification](GEAR.pdf)".
+Then, run the command to start the stance detection server: env FLASK_APP=server.py flask run -p 6000
+
+Run the command in the root to start the main server: env FLASK_APP=server.py flask run
+
 
 ## Requirements:
 Please make sure your environment includes:
@@ -19,10 +19,14 @@ Then, run the command:
 pip install -r requirements.txt
 ```
 
+
+## GEAR 
+
+
 ## Evidence Extraction
 We use the codes from [Athene UKP TU Darmstadt](https://github.com/UKPLab/fever-2018-team-athene) in the document retrieval and sentence selection steps. 
 
-Our evidence extraction results can be found in [Tsinghua Cloud](https://cloud.tsinghua.edu.cn/d/1499a062447f4a3d8de7/) or [Google Cloud](https://drive.google.com/drive/folders/1y-5VdcrqEEMtU8zIGcREacN1JCHqSp5K).
+Evidence extraction results can be found in [Tsinghua Cloud](https://cloud.tsinghua.edu.cn/d/1499a062447f4a3d8de7/) or [Google Cloud](https://drive.google.com/drive/folders/1y-5VdcrqEEMtU8zIGcREacN1JCHqSp5K).
 
 Download these files and put them in the ``data/retrieved/`` folder. Then the folder will look like
 
@@ -49,7 +53,7 @@ cd ..
 ```
 
 ## Feature Extraction
-First download our pretrained BERT-Pair model ([Tsinghua Cloud](https://cloud.tsinghua.edu.cn/d/1499a062447f4a3d8de7/?p=/BERT-Pair&mode=list) or [Google Cloud](https://drive.google.com/drive/folders/1y-5VdcrqEEMtU8zIGcREacN1JCHqSp5K)) and put the files into the ``pretrained_models/BERT-Pair/`` folder.
+First download the pretrained BERT-Pair model ([Tsinghua Cloud](https://cloud.tsinghua.edu.cn/d/1499a062447f4a3d8de7/?p=/BERT-Pair&mode=list) or [Google Cloud](https://drive.google.com/drive/folders/1y-5VdcrqEEMtU8zIGcREacN1JCHqSp5K)) and put the files into the ``pretrained_models/BERT-Pair/`` folder.
 
 Then the folder will look like this:
 ```
@@ -69,36 +73,26 @@ chmod +x *.sh
 cd ..
 ```
 
-## GEAR Training
+##  Training
 ```
 cd gear
 CUDA_VISIBLE_DEVICES=0 python train.py
 cd ..
 ```
 
-## GEAR Testing
+##  Testing
 ```
 cd gear
 CUDA_VISIBLE_DEVICES=0 python test.py
 cd ..
 ```
 
-## Results Gathering
+##  Gathering
 ```
 cd gear
 python results_scorer.py
 cd ..
 ```
 
-## Cite
-
-If you use the code, please cite our paper:
-
-```
-@inproceedings{zhou2019gear,
-  title={GEAR: Graph-based Evidence Aggregating and Reasoning for Fact Verification},
-  author={Zhou, Jie and Han, Xu and Yang, Cheng and Liu, Zhiyuan and Wang, Lifeng and Li, Changcheng and Sun, Maosong},
-  booktitle={Proceedings of ACL 2019},
-  year={2019}
-}
-```
+## Loading pre-trained model 
+Load the inference model in gear-model folder

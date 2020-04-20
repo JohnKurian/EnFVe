@@ -5,10 +5,14 @@ Create a virtual environment fnc in it and then install from requirements.txt
 
 Then, run the command to start the stance detection server: env FLASK_APP=server.py flask run -p 6000
 
+Run the Question generation module: env FLASK_APP=server.py flask run -p 7000
+
 Run the command in the root to start the main server: env FLASK_APP=server.py flask run
 
 
 ## Requirements:
+Install latest version of gcc
+
 Please make sure your environment includes:
 ```
 python (tested on 3.6.7)

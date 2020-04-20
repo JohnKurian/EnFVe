@@ -1,4 +1,4 @@
-from flask import Flask, escape, request, render_template
+from flask import Flask, escape, request, render_template, Response
 import requests
 
 import time
@@ -45,9 +45,9 @@ from spacy.lang.en import English
 
 from serpwow.google_search_results import GoogleSearchResults
 import json
-from pyfasttext import FastText
+# from pyfasttext import FastText
 
-from ESIM import ESIM
+# from ESIM import ESIM
 
 
 import torch.nn.functional as F
@@ -72,6 +72,8 @@ import json
 
 import torch
 from fairseq.data.data_utils import collate_tokens
+
+from flask import jsonify
 
 
 print('loading roberta model..')
@@ -113,7 +115,7 @@ NUM_TREES=50
 nltk.download('punkt')
 
 predictor = Predictor.from_path("https://s3-us-west-2.amazonaws.com/allennlp/models/elmo-constituency-parser-2018.03.14.tar.gz")
-model = FastText("wiki.en.bin")
+#model = FastText("wiki.en.bin")
 
 s = es.Elasticsearch([{'host': 'localhost', 'port': 9200}])
 
@@ -1372,6 +1374,10 @@ def get_results_gear(claim, answer_list):
 
     print("--- %.3f seconds for gear inference ---" % (time.time() - start_time))
 
+
+requests.post('http://127.0.0.1:7000', json={'claim': 'Modi is the president of India.'})
+
+
 def get_stances_ucnlp(claim, evidences):
     return requests.post('http://127.0.0.1:6000', json={'claim': claim, 'evidences': evidences})
 
@@ -1423,6 +1429,21 @@ def hello():
     txh_result_names = ['Not enough info', 'refutes', 'supports']
 
     txh_argmax = [2,1,0]
+    print('something')
+    d = {'status': 'something'}
+    print('request obj:', request)
+    print('json:', request.json)
+    response = jsonify({'some': 'data'})
+    response.headers.add('Access-Control-Allow-Origin', '*')
+
+    return Response(
+        json.dumps(d),
+        mimetype='application/json',
+        headers={
+            'Cache-Control': 'no-cache',
+            'Access-Control-Allow-Origin': '*'
+        }
+    )
 
     if request.method == "POST":
         # get url that the user has entered

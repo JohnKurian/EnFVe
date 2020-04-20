@@ -29,7 +29,8 @@ print('question generation test has finished.')
 process = Popen(['sh', 'simplify.sh'], stdin=PIPE, stdout=PIPE)
 grep_stdout = process.communicate(input=b'A ray, which is an idealized form of light, is represented by a wavelength.\n')[0]
 t = grep_stdout.decode()
-print(t)
+claims = [x for x in t.split('\n') if len(x) > 0]
+print(claims)
 
 print('sentence simplification done.')
 
@@ -48,20 +49,32 @@ def hello():
         # get url that the user has entered
         try:
             claim = request.json['claim']
+            claim_b = bytes(claim+'\n', encoding='ascii')
             process = Popen(['sh', 'run.sh'], stdin=PIPE, stdout=PIPE)
-            grep_stdout = process.communicate(input=b'Tim Cook is the CEO of Apple.\n')[0]
+            grep_stdout = process.communicate(input=claim_b)[0]
             t = grep_stdout.decode()
+
             questions = []
+            answers = []
             for m in t.split('\n'):
-                question = m.split('\t')[0]
-                if len(question) > 0:
+                x = m.split('\t')
+                print('x:', x)
+                question = x[0]
+                if len(x) > 1:
+                    answer = x[2]
+                else:
+                    answer = ''
+
+                if len(question) > 0 and len(x) > 1:
                     questions.append(question)
+                    answers.append(answer)
+
 
             print('questions:', questions)
-
+            print('answers:', answers)
             print('question generation finished.')
             return Response(
-                json.dumps({'questions': questions}),
+                json.dumps({'questions': questions, 'answers': answers}),
                 mimetype='application/json',
                 headers={
                     'Cache-Control': 'no-cache',
@@ -91,20 +104,21 @@ def simplify():
         # get url that the user has entered
         try:
             claim = request.json['claim']
+            claim_b = bytes(claim+'\n', encoding='ascii')
             process = Popen(['sh', 'simplify.sh'], stdin=PIPE, stdout=PIPE)
-            grep_stdout = process.communicate(input=b'Tim Cook is the CEO of Apple.\n')[0]
+            grep_stdout = process.communicate(input=claim_b)[0]
             t = grep_stdout.decode()
-            questions = []
+            claims = []
             for m in t.split('\n'):
-                question = m.split('\t')[0]
-                if len(question) > 0:
-                    questions.append(question)
+                claim = m.split('\t')[0]
+                if len(claim) > 0:
+                    claims.append(claim)
 
-            print('questions:', questions)
+            print('claims:', claims)
 
-            print('question generation finished.')
+            print('claim simplification finished.')
             return Response(
-                json.dumps({'questions': questions}),
+                json.dumps({'claims': claims}),
                 mimetype='application/json',
                 headers={
                     'Cache-Control': 'no-cache',
@@ -112,9 +126,9 @@ def simplify():
                 }
             )
         except:
-            print('Question generation error.')
+            print('claim simplification error.')
             return Response(
-                json.dumps({'error': 'question generation error'}),
+                json.dumps({'error': 'claim simplification error'}),
                 mimetype='application/json',
                 headers={
                     'Cache-Control': 'no-cache',

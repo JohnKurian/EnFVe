@@ -24,3 +24,5 @@ __pycache__/
 /learning_to_retrieve_reasoning_paths/models/__MACOSX/hotpot_models/._reader
 /learning_to_retrieve_reasoning_paths/models/__MACOSX/hotpot_models/reader/._vocab.txt
 /coreference_resolution/coref/
+
+secondary_features/SentimentAnalysis/models/model_bert

@@ -1375,11 +1375,15 @@ def get_results_gear(claim, answer_list):
     print("--- %.3f seconds for gear inference ---" % (time.time() - start_time))
 
 
-requests.post('http://127.0.0.1:7000', json={'claim': 'Modi is the president of India.'})
+requests.post('http://127.0.0.1:9000', json={'text': 'I like icecream'})
 
 
 def get_stances_ucnlp(claim, evidences):
     return requests.post('http://127.0.0.1:6000', json={'claim': claim, 'evidences': evidences})
+
+def get_sentiment_analysis(claim):
+    r = requests.post('http://127.0.0.1:9000/sentiment_analysis', json={'text': claim})
+    return r.json()
 
 def get_roberta_preds(claim, evidences):
     batch_of_pairs = [[claim, evidence] for evidence in evidences]

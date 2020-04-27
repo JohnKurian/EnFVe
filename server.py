@@ -1487,3 +1487,10 @@ def hello():
 
     ####### GEAR
     # result_names = ['True', 'Refutes', 'Not enough info']
+
+app.run(
+    host='0.0.0.0',
+    port=5000,
+    debug=False,
+    threaded=True
+)

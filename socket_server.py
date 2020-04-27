@@ -10,7 +10,8 @@ app.config['SECRET_KEY'] = 'mysecret'
 socketIo = SocketIO(app, cors_allowed_origins="*")
 
 app.debug = True
-app.host = 'localhost'
+app.host = '0.0.0.0'
+app.port = '5000'
 
 
 

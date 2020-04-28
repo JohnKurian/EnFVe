@@ -45,11 +45,11 @@ def simplify_sentence(claim):
 def generate_questions(claim):
     r = requests.post('http://127.0.0.1:7000/generate_question', json={'claim': claim})
     questions = r.json()['questions']
-    answers = r.json()['answers']
-    print('generate questions:', answers)
-    return questions, answers
+    gold_answers = r.json()['answers']
+    print('generated questions:', questions)
+    return questions, gold_answers
 
-def retrieve_answers(question, evidences):
+def retrieve_answer(question, evidences):
     r = requests.post('http://127.0.0.1:10000/', json={'question': question, 'evidences': evidences})
     answer = r.json()['answer']
     print('retrieve answers:', answer)
@@ -69,6 +69,37 @@ def get_results_gear_api(claim, evidences):
     return argmax, evidences, vals
 
 
+def get_toxicity_scores(claim):
+    api_key = 'AIzaSyBTrtgnaWeBx7Z-BMzVS3rL6REJFaaKxaM'
+    url = ('https://commentanalyzer.googleapis.com/v1alpha1/comments:analyze' +
+           '?key=' + api_key)
+    data_dict = {
+        'comment': {'text': claim},
+        'languages': ['en'],
+        'requestedAttributes': {'TOXICITY': {},
+                                'SEVERE_TOXICITY': {},
+                                'IDENTITY_ATTACK': {},
+                                'INSULT': {},
+                                'PROFANITY': {},
+                                'THREAT': {},
+                                'SEXUALLY_EXPLICIT': {},
+                                'FLIRTATION': {}}
+    }
+    response = requests.post(url=url, data=json.dumps(data_dict))
+    response_dict = json.loads(response.content)
+    attributes = list(response_dict['attributeScores'])
+    scores = [item['summaryScore']['value'] for item in list(response_dict['attributeScores'].values())]
+
+    toxicity_scores = {}
+    for i in range(len(attributes)):
+        toxicity_scores[attributes[i]] = round(scores[i], 2)
+        print(f"{attributes[i]}: {round(scores[i], 2)}")
+
+    return toxicity_scores
+
+
+
+
 
 @socketIo.on("message")
 def handleMessage(msg):
@@ -82,6 +113,10 @@ def handleMessage(msg):
     claim = coreference_resolution(claim)
     claims = simplify_sentence(claim)
 
+    gear_results = []
+    generated_questions = []
+    predicted_answers = []
+    filtered_questions = []
 
     for claim in claims:
         evidences, paras, wiki_results, img_urls = get_evidences(claim)
@@ -91,23 +126,53 @@ def handleMessage(msg):
 
         paras_joined = [' '.join(para) for para in paras]
 
-        d = {
-            'prediction_result': prediction_result,
-            'pred_vals': vals,
-            'evidences': evidences,
-            'paras': paras,
-            'wiki_results': wiki_results,
-            'paras_joined': paras_joined,
-            'img_urls': img_urls
-        }
-        print('sending data..')
-        send(d, broadcast=True)
-        print('done.')
+        if len(evidences) > 0:
+            d = {
+                'prediction_result': prediction_result,
+                'pred_vals': vals,
+                'evidences': evidences,
+                'paras': paras,
+                'wiki_results': wiki_results,
+                'paras_joined': paras_joined,
+                'img_urls': img_urls
+            }
+            gear_results.append(d)
+
+        questions, gold_answers = generate_questions(claim)
+        generated_questions = generated_questions + questions
+
+
+        for question in questions:
+            if len(paras_joined) > 0:
+                answer = retrieve_answer(question, paras_joined)
+                filtered_questions.append(question)
+                predicted_answers.append(answer)
+
+
+    qa_pairs = []
+    for idx, question in enumerate(filtered_questions):
+        qa_pairs.append({'question': question, 'answer': predicted_answers[idx]})
+
+    toxicity_scores = get_toxicity_scores(claim)
+
+    print('sending data..')
+    print('questions, answers', qa_pairs)
+    print('gear_results:', gear_results)
+    print('toxicity scores:', toxicity_scores)
+
+    payload = {
+        'qa_pairs': qa_pairs,
+        'gear_results': gear_results,
+        'toxicity_scores': toxicity_scores
+    }
+    send(payload, broadcast=True)
+    print('done.')
     return None
 
 
 @app.route('/', methods=['GET', 'POST'])
 def answer():
+    print('$$$$$$$$$$$$$$$ INSIDE ROUTE $$$$$$$$$$$$$$')
     return Response(
                 json.dumps({'key': 'value'}),
                 mimetype='application/json',

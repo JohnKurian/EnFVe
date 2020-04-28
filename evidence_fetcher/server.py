@@ -670,70 +670,87 @@ def get_roberta_preds(claim, evidences):
 
 @app.route('/', methods=['GET', 'POST'])
 def get_evidences_use_annoy():
-    print('req:', request.json)
-    claim = request.json['claim']
-    filtered_lines, wiki_results = doc_retrieval(claim)
-
-    # filtered_lines = [x for x in filtered_lines if len(x)>60]
-
-    print('getting embeddings..')
-    embeddings = use_model(filtered_lines)
-
-    claim_embedding = use_model([claim])
-
-    print('numpy distance..')
-
-    distances = [np.linalg.norm(a - claim_embedding) for a in embeddings]
-    idxs = np.argsort(distances)[::-1][-5:]
-    nns = idxs.tolist()
-
-    nns.reverse()
-
-
-    wiki_results_filtered = [wiki_results[n] for n in nns ]
-
-    paras = [[x - 1, x, x + 1] for x in nns]
-
-    for idx, i in enumerate(nns):
-        if i == 0:
-            paras[idx] = [0, 1, 2]
-        elif i == len(filtered_lines) - 1:
-            paras[len(nns) - 1] = [len(filtered_lines) - 3, len(filtered_lines) - 2, len(filtered_lines) - 1]
+    try:
+        print('req:', request.json)
+        claim = request.json['claim']
+        filtered_lines, wiki_results = doc_retrieval(claim)
+        # filtered_lines = [x for x in filtered_lines if len(x)>60]
 
 
 
 
-        # ann = AnnoyIndex(D)
-    #
-    # for index, embed in enumerate(embeddings):
-    #     ann.add_item(index, embed)
-    # ann.build(NUM_TREES)
-    #
-    # nns = ann.get_nns_by_vector(claim_embedding[0], 5)
+        print('getting embeddings..')
+        embeddings = use_model(filtered_lines)
 
-    similar_lines = [filtered_lines[i] for i in nns]
-    similar_paras = [[filtered_lines[x] for x in para_idxs] for para_idxs in paras]
+        claim_embedding = use_model([claim])
+        print('numpy distance..')
 
-    img_urls = []
-    for result in wiki_results_filtered:
-        base_url = "https://en.wikipedia.org/w/api.php?action=query&prop=pageimages&format=json&piprop=original&titles=" + result
-        r = requests.get(base_url)
-        img_url = r.json()['query']['pages'][list(r.json()['query']['pages'].keys())[0]]['original']['source']
-        img_urls.append(img_url)
+        distances = [np.linalg.norm(a - claim_embedding) for a in embeddings]
+        idxs = np.argsort(distances)[::-1][-5:]
+        nns = idxs.tolist()
 
-    return Response(
-        json.dumps({
-            'similar_lines': similar_lines,
-            'similar_paras': similar_paras,
-            'wiki_results_filtered': wiki_results_filtered,
-            'img_urls': img_urls
-        }),
-        mimetype='application/json',
-        headers={
-            'Cache-Control': 'no-cache',
-            'Access-Control-Allow-Origin': '*'
-        }
-    )
+        nns.reverse()
+
+
+        wiki_results_filtered = [wiki_results[n] for n in nns ]
+
+        paras = [[x - 1, x, x + 1] for x in nns]
+
+        for idx, i in enumerate(nns):
+            if i == 0:
+                paras[idx] = [0, 1, 2]
+            elif i == len(filtered_lines) - 1:
+                paras[len(nns) - 1] = [len(filtered_lines) - 3, len(filtered_lines) - 2, len(filtered_lines) - 1]
+
+
+
+
+            # ann = AnnoyIndex(D)
+        #
+        # for index, embed in enumerate(embeddings):
+        #     ann.add_item(index, embed)
+        # ann.build(NUM_TREES)
+        #
+        # nns = ann.get_nns_by_vector(claim_embedding[0], 5)
+
+        similar_lines = [filtered_lines[i] for i in nns]
+        similar_paras = [[filtered_lines[x] for x in para_idxs] for para_idxs in paras]
+
+        img_urls = []
+        for result in wiki_results_filtered:
+            base_url = "https://en.wikipedia.org/w/api.php?action=query&prop=pageimages&format=json&piprop=original&titles=" + result
+            r = requests.get(base_url)
+            img_url = r.json()['query']['pages'][list(r.json()['query']['pages'].keys())[0]]['original']['source']
+            img_urls.append(img_url)
+
+        return Response(
+            json.dumps({
+                'similar_lines': similar_lines,
+                'similar_paras': similar_paras,
+                'wiki_results_filtered': wiki_results_filtered,
+                'img_urls': img_urls
+            }),
+            mimetype='application/json',
+            headers={
+                'Cache-Control': 'no-cache',
+                'Access-Control-Allow-Origin': '*'
+            }
+        )
+
+    except:
+        return Response(
+            json.dumps({
+                'similar_lines': '',
+                'similar_paras': '',
+                'wiki_results_filtered': '',
+                'img_urls': ''
+            }),
+            mimetype='application/json',
+            headers={
+                'Cache-Control': 'no-cache',
+                'Access-Control-Allow-Origin': '*'
+            }
+        )
 
 
 app.run(

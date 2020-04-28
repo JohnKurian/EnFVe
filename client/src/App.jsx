@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import io from "socket.io-client";
-import { DatePicker, Tooltip, Button, Spin } from 'antd';
+import {DatePicker, Tooltip, Button, Spin, Card, Avatar} from 'antd';
 import { SearchOutlined, QuestionCircleTwoTone, CheckCircleTwoTone, CloseCircleTwoTone } from '@ant-design/icons';
 import Demo from './Demo';
 import Evidences from './Evidences';
@@ -39,9 +39,10 @@ let endPoint = "http://localhost:5000";
 let socket = io.connect(`${endPoint}`);
 
 const App = () => {
-  const [messages, setMessages] = useState([]);
+  const [messages, setMessages] = useState({});
   const [message, setMessage] = useState("");
   const [spinner, setSpinner] = useState(false)
+  const [testMessage, setTestMessage] = useState("");
 
   useEffect(() => {
     getMessages();
@@ -67,6 +68,22 @@ const App = () => {
     if (message !== "") {
       setSpinner(true)
       socket.emit("message", message);
+
+      // fetch('http://localhost:5000/')
+      //     .then(res => res.json())
+      //     .then(
+      //         (result) => {
+      //           console.log('inside fetch:', result)
+      //           setTestMessage(result);
+      //         },
+      //         // error handler
+      //         (error) => {
+      //           // this.setState({
+      //           //   isLoaded: true,
+      //           //   error
+      //           // });
+      //         }
+      //     )
       setMessage("");
     } else {
       alert("Please Add A Message");
@@ -127,14 +144,27 @@ const App = () => {
 
 
         { Object.keys(messages).length > 0 && spinner !==true &&
-        <div style={{'display': 'flex', 'flex-direction': 'row', 'align-items': 'flex-start'}}>
-          <div style={{'display': 'flex', 'flex-direction': 'column', 'align-items': 'center'}}>
-            <div> {predKey[messages.prediction_result]} {messages.prediction_result}</div>
-        <ResultsGraph evidences={messages}/>
-          </div>
-          <Evidences evidences={messages}/>
-        </div>
+        messages['gear_results'].map(message => <div style={{'display': 'flex', 'flex-direction': 'row', 'align-items': 'flex-start'}}>
+            <div style={{'display': 'flex', 'flex-direction': 'column', 'align-items': 'center'}}>
+              <div> {predKey[message.prediction_result]} {message.prediction_result}</div>
+              <ResultsGraph evidences={message}/>
+            </div>
+            <Evidences evidences={message}/>
+          </div>)
         }
+
+      { Object.keys(messages).length > 0 && spinner !==true &&
+      messages['qa_pairs'].map(message => <div style={{'display': 'flex', 'flex-direction': 'row', 'align-items': 'flex-start'}}>
+        <div>{message['question']}</div>
+        <div>{message['answer']}</div>
+      </div>)
+      }
+
+      { Object.keys(messages).length > 0 && spinner !==true &&
+      <div style={{'display': 'flex', 'flex-direction': 'row', 'align-items': 'flex-start'}}>
+        <div>TOXICITY: {messages['toxicity_scores']['TOXICITY']}</div>
+      </div>
+      }
 
 
     </div>

@@ -30,7 +30,7 @@ class ResultsGraph extends React.Component {
         console.log('data:', data)
 
         // const activeItem = data[activeIndex];
-        const colors = ['green', 'red', 'yellow']
+        const colors = ['#66BB6A', '#FF7043', '#FFEE58']
 
         return (
             <div>

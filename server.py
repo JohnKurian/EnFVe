@@ -1,4 +1,4 @@
-from flask import Flask, escape, request, render_template, Response
+from flask import Flask, request, render_template, Response
 import requests
 
 import time
@@ -6,16 +6,14 @@ import time
 from pytorch_pretrained_bert.tokenization import BertTokenizer as GEARBertTokenizer
 from pytorch_pretrained_bert.modeling import BertModel as GEARBertModel
 
-import torch
-from torch.utils.data import TensorDataset, DataLoader, SequentialSampler
+from torch.utils.data import SequentialSampler
 
-from tqdm import tqdm
 import collections
 
-from models import GEAR
+from GEAR.models import GEAR
 import torch.optim as optim
 from torch.autograd import Variable
-from torch.utils.data import TensorDataset, DataLoader
+from torch.utils.data import TensorDataset
 
 import numpy as np
 
@@ -23,28 +21,17 @@ import elasticsearch as es
 
 import unicodedata
 
-import argparse
-import json
-import os
 import re
 import nltk
-from nltk.tokenize import sent_tokenize
-from nltk.corpus import stopwords
 import wikipedia
 from allennlp.predictors.predictor import Predictor
-from tqdm import tqdm
 
 import tensorflow as tf
 import tensorflow_hub as hub
 
-from annoy import AnnoyIndex
-
 import wikipediaapi
 
-from spacy.lang.en import English
-
 from serpwow.google_search_results import GoogleSearchResults
-import json
 # from pyfasttext import FastText
 
 # from ESIM import ESIM
@@ -55,14 +42,13 @@ import dgl
 
 from pytorch_transformers.file_utils import PYTORCH_PRETRAINED_BERT_CACHE
 
-from data import HotpotDataset, FEVERDataset, TransformerXHDataset
-from torch.utils.data import Dataset, DataLoader
+from data import FEVERDataset
+from torch.utils.data import DataLoader
 
 from pytorch_transformers.tokenization_bert import BertTokenizer
 
 from pytorch_transformers.modeling_bert import BertModel, BertEncoder, BertPreTrainedModel
 
-import torch
 import torch.nn as nn
 
 import logging

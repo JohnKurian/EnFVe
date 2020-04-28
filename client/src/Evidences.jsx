@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { Row, Col, Slider } from 'antd';
 
+import { Card, Avatar } from 'antd';
+
+const { Meta } = Card;
+
 class Evidences extends React.Component {
 
     gutters = {};
@@ -64,20 +68,21 @@ class Evidences extends React.Component {
             for (let i = 0; i < 5; i++) {
                 let link = "https://en.wikipedia.org/wiki/" + this.props.evidences.wiki_results[i]
                 evidences.push(
-                    <div>
-                        <div style={{'margin': '15px'}}>
-                            {this.props.evidences.paras_joined[i]}
-                        </div>
-                        <div>
-                            {/*<div onClick={this.onLogoClick.bind(this)} style={{marginTop: '15px', cursor: 'pointer', marginBottom: '24px', height: '64px', display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center'}}>*/}
+                        <Card style={{ width: 600 }}>
+
+                            <Meta
+                                avatar={<Avatar src={this.props.evidences.img_urls[i]} />}
+                                title={this.props.evidences.wiki_results[i]}
+                            />
+
+                            <p><i>{this.props.evidences.paras_joined[i]}</i></p>
+                            <img style={{width: 30, height: 30, padding: '5px'}}
+                                 src={require('./icons8-wikipedia-50.png')}></img>
                             <a href={link} target="_blank">
-                                <img style={{width: 30, height: 30, padding: '5px'}}
-                                     src={require('./icons8-wikipedia-50.png')}></img>
+                                read more
                             </a>
 
-                            {/*</div>*/}
-                        </div>
-                    </div>
+                        </Card>
                 )
             }
         }

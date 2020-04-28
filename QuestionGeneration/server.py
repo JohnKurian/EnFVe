@@ -135,3 +135,10 @@ def simplify():
                     'Access-Control-Allow-Origin': '*'
                 }
             )
+
+app.run(
+    host='0.0.0.0',
+    port=7000,
+    debug=False,
+    threaded=True
+)

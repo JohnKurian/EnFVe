@@ -6,12 +6,12 @@ from pytorch_pretrained_bert.tokenization import BertTokenizer
 from pytorch_pretrained_bert.modeling import BertModel
 
 import torch
-from torch.utils.data import TensorDataset, DataLoader, SequentialSampler
+from torch.utils.data import SequentialSampler
 
 from tqdm import tqdm
 import collections
 
-from models import GEAR
+from GEAR.models import GEAR
 import torch.optim as optim
 from torch.autograd import Variable
 from torch.utils.data import TensorDataset, DataLoader

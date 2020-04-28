@@ -1,0 +1,25 @@
+Metadata-Version: 1.2
+Name: neuralcoref
+Version: 4.0
+Summary: Coreference Resolution in spaCy with Neural Networks
+Home-page: https://github.com/huggingface/neuralcoref
+Author: Thomas Wolf
+Author-email: thomwolf@gmail.com
+License: MIT
+Description: UNKNOWN
+Keywords: NLP chatbots coreference resolution
+Platform: any
+Classifier: Development Status :: 3 - Alpha
+Classifier: Environment :: Console
+Classifier: Intended Audience :: Developers
+Classifier: Intended Audience :: Science/Research
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: POSIX :: Linux
+Classifier: Operating System :: MacOS :: MacOS X
+Classifier: Operating System :: Microsoft :: Windows
+Classifier: Programming Language :: Cython
+Classifier: Programming Language :: Python :: 3.6
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Topic :: Scientific/Engineering
+Requires-Python: >=3.6

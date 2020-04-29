@@ -7,8 +7,11 @@ import Evidences from './Evidences';
 import ResultsGraph from './ResultsGraph'
 import { Row, Col } from 'antd';
 import { Typography } from 'antd';
+import { Progress } from "antd";
 
 import { Input } from 'antd';
+import Insights from "./Insights";
+import Questions from "./Questions";
 
 
 
@@ -69,21 +72,21 @@ const App = () => {
       setSpinner(true)
       socket.emit("message", message);
 
-      // fetch('http://localhost:5000/')
-      //     .then(res => res.json())
-      //     .then(
-      //         (result) => {
-      //           console.log('inside fetch:', result)
-      //           setTestMessage(result);
-      //         },
-      //         // error handler
-      //         (error) => {
-      //           // this.setState({
-      //           //   isLoaded: true,
-      //           //   error
-      //           // });
-      //         }
-      //     )
+      fetch('/')
+          .then(res => {console.log('inside fetch'); setTestMessage(res.json());})
+          .then(
+              (result) => {
+                console.log('inside fetch:', result)
+                setTestMessage(result);
+              },
+              // error handler
+              (error) => {
+                // this.setState({
+                //   isLoaded: true,
+                //   error
+                // });
+              }
+          )
       setMessage("");
     } else {
       alert("Please Add A Message");
@@ -130,6 +133,8 @@ const App = () => {
               onSearch={message => onCustomSearchClick(message)}
           />
 
+            {testMessage}
+
       {/*<Demo/>*/}
       {/*  <Tooltip title="search">*/}
       {/*      <Button type="primary" shape="circle" icon={<SearchOutlined />} />*/}
@@ -141,6 +146,33 @@ const App = () => {
       <br/>
       { spinner && <Spin size="large" /> }
 
+      { spinner !==true && Object.keys(messages).length === 0 &&
+        <div style={{'display': 'flex', 'flex-direction': 'row', 'align-items': 'flex-start'}}>
+          <div style={{'margin': '10px'}}>
+            <Card title="Default size card" extra={<a href="#">More</a>} style={{ width: 300 }}>
+              <p>Card content</p>
+              <p>Card content</p>
+              <p>Card content</p>
+            </Card>
+          </div>
+          <div style={{'margin': '10px'}}>
+            <Card title="Default size card" extra={<a href="#">More</a>} style={{ width: 300 }}>
+              <p>Card content</p>
+              <p>Card content</p>
+              <p>Card content</p>
+            </Card>
+          </div>
+          <div style={{'margin': '10px'}}>
+            <Card title="Default size card" extra={<a href="#">More</a>} style={{ width: 300 }}>
+              <p>Card content</p>
+              <p>Card content</p>
+              <p>Card content</p>
+            </Card>
+          </div>
+        </div>
+      }
+
+
 
 
         { Object.keys(messages).length > 0 && spinner !==true &&
@@ -148,23 +180,17 @@ const App = () => {
             <div style={{'display': 'flex', 'flex-direction': 'column', 'align-items': 'center'}}>
               <div> {predKey[message.prediction_result]} {message.prediction_result}</div>
               <ResultsGraph evidences={message}/>
+                <Insights messages={messages}/>
             </div>
             <Evidences evidences={message}/>
+            <Questions messages={messages}/>
           </div>)
         }
 
-      { Object.keys(messages).length > 0 && spinner !==true &&
-      messages['qa_pairs'].map(message => <div style={{'display': 'flex', 'flex-direction': 'row', 'align-items': 'flex-start'}}>
-        <div>{message['question']}</div>
-        <div>{message['answer']}</div>
-      </div>)
-      }
 
-      { Object.keys(messages).length > 0 && spinner !==true &&
-      <div style={{'display': 'flex', 'flex-direction': 'row', 'align-items': 'flex-start'}}>
-        <div>TOXICITY: {messages['toxicity_scores']['TOXICITY']}</div>
-      </div>
-      }
+{/*       { Object.keys(messages).length > 0 && spinner !==true && */}
+
+{/*       } */}
 
 
     </div>

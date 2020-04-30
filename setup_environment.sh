@@ -81,5 +81,6 @@ sudo apt-get install default-jdk
 curl -sL https://deb.nodesource.com/setup_10.x | sudo bash -
 sudo apt-get install -y nodejs
 
+pip3.7 install tensorflow==2.0.0b1
 
 

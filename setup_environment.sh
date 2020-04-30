@@ -75,9 +75,11 @@ cd ..
 wget https://storage.googleapis.com/fakenews_datasets/FEVER/BERT-Pair.tar.gz
 tar -xvf BERT-Pair.tar.gz
 
-add-apt-repository ppa:linuxuprising/java
-apt update
+sudo apt-get install default-jre
+sudo apt-get install default-jdk
 
+curl -sL https://deb.nodesource.com/setup_10.x | sudo bash -
+sudo apt-get install -y nodejs
 
 
 

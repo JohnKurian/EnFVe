@@ -16,11 +16,11 @@ app.port = '5000'
 
 
 def get_stances_ucnlp(claim, evidences):
-    return requests.post('http://127.0.0.1:6000', json={'claim': claim, 'evidences': evidences})
+    return requests.post('http://0.0.0.0:6000', json={'claim': claim, 'evidences': evidences})
 
 
 def get_evidences(claim):
-    r = requests.post('http://127.0.0.1:11000', json={'claim': claim})
+    r = requests.post('http://0.0.0.0:11000', json={'claim': claim})
     similar_lines = r.json()['similar_lines']
     similar_paras = r.json()['similar_paras']
     wiki_results_filtered = r.json()['wiki_results_filtered']
@@ -31,37 +31,37 @@ def get_evidences(claim):
 
 
 def coreference_resolution(claim):
-    r = requests.post('http://127.0.0.1:8000', json={'claim': claim})
+    r = requests.post('http://0.0.0.0:8000', json={'claim': claim})
     resolved_coref = r.json()['resolved_coref']
     print('resolved coreference:', resolved_coref)
     return resolved_coref
 
 def simplify_sentence(claim):
-    r = requests.post('http://127.0.0.1:7000/simplify_sentence', json={'claim': claim})
+    r = requests.post('http://0.0.0.0:7000/simplify_sentence', json={'claim': claim})
     claims = r.json()['claims']
     print('simplify sentence:', claims)
     return claims
 
 def generate_questions(claim):
-    r = requests.post('http://127.0.0.1:7000/generate_question', json={'claim': claim})
+    r = requests.post('http://0.0.0.0:7000/generate_question', json={'claim': claim})
     questions = r.json()['questions']
     gold_answers = r.json()['answers']
     print('generated questions:', questions)
     return questions, gold_answers
 
 def retrieve_answer(question, evidences):
-    r = requests.post('http://127.0.0.1:10000/', json={'question': question, 'evidences': evidences})
+    r = requests.post('http://0.0.0.0:10000/', json={'question': question, 'evidences': evidences})
     answer = r.json()['answer']
     print('retrieve answers:', answer)
     return answer
 
 
 def get_sentiment_analysis(claim):
-    r = requests.post('http://127.0.0.1:9000/sentiment_analysis', json={'text': claim})
+    r = requests.post('http://0.0.0.0:9000/sentiment_analysis', json={'text': claim})
     return r.json()
 
 def get_results_gear_api(claim, evidences):
-    r = requests.post('http://127.0.0.1:12000/', json={'claim': claim, 'evidences': evidences})
+    r = requests.post('http://0.0.0.0:12000/', json={'claim': claim, 'evidences': evidences})
     argmax = r.json()['argmax']
     evidences =r.json()['evidences']
     vals = r.json()['vals']

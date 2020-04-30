@@ -68,7 +68,7 @@ class Evidences extends React.Component {
             for (let i = 0; i < 5; i++) {
                 let link = "https://en.wikipedia.org/wiki/" + this.props.evidences.wiki_results[i]
                 evidences.push(
-                        <Card style={{ width: 600 }}>
+                        <Card style={{ width: 500 }}>
 
                             <Meta
                                 avatar={<Avatar src={this.props.evidences.img_urls[i]} />}

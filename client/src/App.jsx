@@ -37,9 +37,9 @@ let predKey = {
   'Refutes': <CloseCircleTwoTone twoToneColor="#FF7043" />,
   'Not enough Info': <QuestionCircleTwoTone twoToneColor="#FFEE58" />
 }
-
-let endPoint = "http://localhost:5000";
-let socket = io.connect(`${endPoint}`);
+//
+// let endPoint = "http://localhost:5000";
+// let socket = io.connect(`${endPoint}`);
 
 const App = () => {
   const [messages, setMessages] = useState({});
@@ -47,57 +47,48 @@ const App = () => {
   const [spinner, setSpinner] = useState(false)
   const [testMessage, setTestMessage] = useState("");
 
-  useEffect(() => {
-    getMessages();
-  }, [messages.length]);
+  // useEffect(() => {
+  //   getMessages();
+  // }, [messages.length]);
 
-  const getMessages = () => {
-    socket.on("message", msg => {
-      //   let allMessages = messages;
-      //   allMessages.push(msg);
-      //   setMessages(allMessages);
-      setSpinner(false)
-      setMessages(msg);
-    });
-  };
+  // const getMessages = () => {
+  //   socket.on("message", msg => {
+  //     //   let allMessages = messages;
+  //     //   allMessages.push(msg);
+  //     //   setMessages(allMessages);
+  //     setSpinner(false)
+  //     setMessages(msg);
+  //   });
+  // };
 
   // On Change
   const onChange = e => {
     setMessage(e.target.value);
   };
 
-  // On Click
-  const onClick = () => {
-    if (message !== "") {
-      setSpinner(true)
-      socket.emit("message", message);
-
-      fetch('/')
-          .then(res => {console.log('inside fetch'); setTestMessage(res.json());})
-          .then(
-              (result) => {
-                console.log('inside fetch:', result)
-                setTestMessage(result);
-              },
-              // error handler
-              (error) => {
-                // this.setState({
-                //   isLoaded: true,
-                //   error
-                // });
-              }
-          )
-      setMessage("");
-    } else {
-      alert("Please Add A Message");
-    }
-  };
 
   const onCustomSearchClick = (message) => {
     if (message !== "") {
       setSpinner(true)
-      socket.emit("message", message);
+      // socket.emit("message", message);
       setMessage("");
+
+      fetch(`/test`, {
+          method: 'POST',
+          headers: {
+              'Accept': 'application/json',
+              'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({'claim': message})
+      })
+        .then(res => res.json())
+        .then(json => {
+            console.log('inside:', json);
+            setSpinner(false)
+            setMessages(json);
+        });
+    console.log('finish')
+
     } else {
       alert("Please Add A Message");
     }
@@ -109,7 +100,7 @@ const App = () => {
 
       <div>
     <div style={{'display': 'flex', 'flex-direction': 'column', 'align-items': 'center'}}>
-        <div style={{'display': 'flex', 'flex-direction': 'row', 'align-items': 'center'}}>
+        <div style={{'display': 'flex', 'flex-direction': 'row', 'align-items': 'center', 'margin': '30px'}}>
         <img src={ require('./icons8-james-bond-64.png') } />
         {/*<Spin />*/}
         <Title level={2}>Detective AI: Explainable fact verification</Title>
@@ -146,31 +137,31 @@ const App = () => {
       <br/>
       { spinner && <Spin size="large" /> }
 
-      { spinner !==true && Object.keys(messages).length === 0 &&
-        <div style={{'display': 'flex', 'flex-direction': 'row', 'align-items': 'flex-start'}}>
-          <div style={{'margin': '10px'}}>
-            <Card title="Default size card" extra={<a href="#">More</a>} style={{ width: 300 }}>
-              <p>Card content</p>
-              <p>Card content</p>
-              <p>Card content</p>
-            </Card>
-          </div>
-          <div style={{'margin': '10px'}}>
-            <Card title="Default size card" extra={<a href="#">More</a>} style={{ width: 300 }}>
-              <p>Card content</p>
-              <p>Card content</p>
-              <p>Card content</p>
-            </Card>
-          </div>
-          <div style={{'margin': '10px'}}>
-            <Card title="Default size card" extra={<a href="#">More</a>} style={{ width: 300 }}>
-              <p>Card content</p>
-              <p>Card content</p>
-              <p>Card content</p>
-            </Card>
-          </div>
-        </div>
-      }
+      {/*{ spinner !==true && Object.keys(messages).length === 0 &&*/}
+      {/*  <div style={{'display': 'flex', 'flex-direction': 'row', 'align-items': 'flex-start'}}>*/}
+      {/*    <div style={{'margin': '10px'}}>*/}
+      {/*      <Card title="Default size card" extra={<a href="#">More</a>} style={{ width: 300 }}>*/}
+      {/*        <p>Card content</p>*/}
+      {/*        <p>Card content</p>*/}
+      {/*        <p>Card content</p>*/}
+      {/*      </Card>*/}
+      {/*    </div>*/}
+      {/*    <div style={{'margin': '10px'}}>*/}
+      {/*      <Card title="Default size card" extra={<a href="#">More</a>} style={{ width: 300 }}>*/}
+      {/*        <p>Card content</p>*/}
+      {/*        <p>Card content</p>*/}
+      {/*        <p>Card content</p>*/}
+      {/*      </Card>*/}
+      {/*    </div>*/}
+      {/*    <div style={{'margin': '10px'}}>*/}
+      {/*      <Card title="Default size card" extra={<a href="#">More</a>} style={{ width: 300 }}>*/}
+      {/*        <p>Card content</p>*/}
+      {/*        <p>Card content</p>*/}
+      {/*        <p>Card content</p>*/}
+      {/*      </Card>*/}
+      {/*    </div>*/}
+      {/*  </div>*/}
+      {/*}*/}
 
 
 
@@ -178,7 +169,7 @@ const App = () => {
         { Object.keys(messages).length > 0 && spinner !==true &&
         messages['gear_results'].map(message => <div style={{'display': 'flex', 'flex-direction': 'row', 'align-items': 'flex-start'}}>
             <div style={{'display': 'flex', 'flex-direction': 'column', 'align-items': 'center'}}>
-              <div> {predKey[message.prediction_result]} {message.prediction_result}</div>
+              <div style={{'fontSize': '25px'}}> {predKey[message.prediction_result]} {message.prediction_result}</div>
               <ResultsGraph evidences={message}/>
                 <Insights messages={messages}/>
             </div>

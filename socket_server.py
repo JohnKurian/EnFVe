@@ -1,5 +1,5 @@
 from flask_socketio import SocketIO, send
-from flask import Flask, Response
+from flask import Flask, Response, request
 import requests
 import json
 
@@ -7,7 +7,7 @@ import json
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'mysecret'
 
-socketIo = SocketIO(app, cors_allowed_origins="*")
+# socketIo = SocketIO(app, cors_allowed_origins="*")
 
 app.debug = True
 app.host = '0.0.0.0'
@@ -101,9 +101,82 @@ def get_toxicity_scores(claim):
 
 
 
-@socketIo.on("message")
-def handleMessage(msg):
+# @socketIo.on("message")
+# def handleMessage(msg):
+#     print('something')
+#     print(msg)
+#
+#     gear_result_names = ['True', 'Refutes', 'Not enough info']
+#     claim = msg
+#     print(claim)
+#
+#     claim = coreference_resolution(claim)
+#     claims = simplify_sentence(claim)
+#
+#     gear_results = []
+#     generated_questions = []
+#     predicted_answers = []
+#     filtered_questions = []
+#
+#     for claim in claims:
+#         evidences, paras, wiki_results, img_urls = get_evidences(claim)
+#         argmax, evidences, vals = get_results_gear_api(claim, evidences)
+#         print('gear results:', argmax, vals)
+#         prediction_result = gear_result_names[argmax]
+#
+#         paras_joined = [' '.join(para) for para in paras]
+#
+#         if len(evidences) > 0:
+#             d = {
+#                 'prediction_result': prediction_result,
+#                 'pred_vals': vals,
+#                 'evidences': evidences,
+#                 'paras': paras,
+#                 'wiki_results': wiki_results,
+#                 'paras_joined': paras_joined,
+#                 'img_urls': img_urls
+#             }
+#             gear_results.append(d)
+#
+#         questions, gold_answers = generate_questions(claim)
+#         generated_questions = generated_questions + questions
+#
+#
+#         for question in questions:
+#             if len(paras_joined) > 0:
+#                 answer = retrieve_answer(question, paras_joined)
+#                 filtered_questions.append(question)
+#                 predicted_answers.append(answer)
+#
+#
+#     qa_pairs = []
+#     for idx, question in enumerate(filtered_questions):
+#         qa_pairs.append({'question': question, 'answer': predicted_answers[idx]})
+#
+#     toxicity_scores = get_toxicity_scores(claim)
+#
+#     print('sending data..')
+#     print('questions, answers', qa_pairs)
+#     print('gear_results:', gear_results)
+#     print('toxicity scores:', toxicity_scores)
+#
+#     payload = {
+#         'qa_pairs': qa_pairs,
+#         'gear_results': gear_results,
+#         'toxicity_scores': toxicity_scores
+#     }
+#     send(payload, broadcast=True)
+#     print('done.')
+#     return None
+
+
+@app.route('/test', methods=['GET', 'POST'])
+def answer():
+    print('$$$$$$$$$$$$$$$ INSIDE ROUTE $$$$$$$$$$$$$$')
     print('something')
+    msg = request.json['claim']
+    print('request:', request)
+    print('request json:', request.json)
     print(msg)
 
     gear_result_names = ['True', 'Refutes', 'Not enough info']
@@ -165,16 +238,8 @@ def handleMessage(msg):
         'gear_results': gear_results,
         'toxicity_scores': toxicity_scores
     }
-    send(payload, broadcast=True)
-    print('done.')
-    return None
-
-
-@app.route('/', methods=['GET', 'POST'])
-def answer():
-    print('$$$$$$$$$$$$$$$ INSIDE ROUTE $$$$$$$$$$$$$$')
     return Response(
-                json.dumps({'key': 'value'}),
+                json.dumps(payload),
                 mimetype='application/json',
                 headers={
                     'Cache-Control': 'no-cache',
@@ -183,5 +248,5 @@ def answer():
             )
 
 
-socketIo.run(app)
+app.run()
 

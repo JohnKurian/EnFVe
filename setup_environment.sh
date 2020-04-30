@@ -59,6 +59,8 @@ sudo pip3.7 install  flask flask_socketio requests pytorch_pretrained_bert elast
 
 sudo python3.7  -m spacy download en_core_web_sm
 
+pip3.7 install virtualenv
+
 mkdir gear-model
 cd gear-model/
 wget https://storage.googleapis.com/fakenews_datasets/FEVER/gear-model/best.pth.tar
@@ -72,6 +74,10 @@ cd ..
 
 wget https://storage.googleapis.com/fakenews_datasets/FEVER/BERT-Pair.tar.gz
 tar -xvf BERT-Pair.tar.gz
+
+add-apt-repository ppa:linuxuprising/java
+apt update
+
 
 
 

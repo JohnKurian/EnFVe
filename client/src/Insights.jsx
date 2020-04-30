@@ -14,93 +14,42 @@ class Insights extends React.Component {
     render() {
         const { value } = this.state;
 
+        const stateMap = {
+            'TOXICITY': 'Toxicity',
+            'SEVERE_TOXICITY': 'Severe Toxicity',
+            'IDENTITY_ATTACK': 'Identity Attack',
+            'INSULT': 'Insult',
+            'PROFANITY': 'Profanity',
+            'THREAT': 'Threat',
+            'SEXUALLY_EXPLICIT': 'Sexually Explicit',
+            'FLIRTATION': 'Flirtation'
+        }
+
         return (
-                <div style={{'display': 'flex', 'flex-direction': 'column', 'align-items': 'center'}}>
-                    <div style={{'display': 'flex'}}>
-                    TOXICITY: {this.props.messages['toxicity_scores']['TOXICITY']}
-                    <Progress
-                        type="circle"
-                        strokeColor={{
-                            "0%": "#108ee9",
-                            "100%": 'red'
-                        }}
-                        percent={parseInt(this.props.messages['toxicity_scores']['TOXICITY']*100)}
-                    />
-                    </div>
+                <div style={{'display': 'flex', 'flex-direction': 'column', 'align-items': 'flex-end', 'marginTop': '50px'}}>
 
-                    SEVERE_TOXICITY: {this.props.messages['toxicity_scores']['SEVERE_TOXICITY']}
-                    <Progress
-                        type="circle"
-                        strokeColor={{
-                            "0%": "#108ee9",
-                            "100%": 'red'
-                        }}
-                        percent={parseInt(this.props.messages['toxicity_scores']['SEVERE_TOXICITY']*100)}
-                    />
-
-                    IDENTITY_ATTACK: {this.props.messages['toxicity_scores']['IDENTITY_ATTACK']}
-                    <Progress
-                        type="circle"
-                        strokeColor={{
-                            "0%": "#108ee9",
-                            "100%": 'red'
-                        }}
-                        percent={parseInt(this.props.messages['toxicity_scores']['IDENTITY_ATTACK']*100)}
-                    />
-
-                    TOXICITY: {this.props.messages['toxicity_scores']['INSULT']}
-                    <Progress
-                        type="circle"
-                        strokeColor={{
-                            "0%": "#108ee9",
-                            "100%": 'red'
-                        }}
-                        percent={parseInt(this.props.messages['toxicity_scores']['INSULT']*100)}
-                    />
-
-                    TOXICITY: {this.props.messages['toxicity_scores']['PROFANITY']}
-                    <Progress
-                        type="circle"
-                        strokeColor={{
-                            "0%": "#108ee9",
-                            "100%": 'red'
-                        }}
-                        percent={parseInt(this.props.messages['toxicity_scores']['PROFANITY']*100)}
-                    />
-
-                    TOXICITY: {this.props.messages['toxicity_scores']['THREAT']}
-                    <Progress
-                        type="circle"
-                        strokeColor={{
-                            "0%": "#108ee9",
-                            "100%": 'red'
-                        }}
-                        percent={parseInt(this.props.messages['toxicity_scores']['THREAT']*100)}
-                    />
-
-                    TOXICITY: {this.props.messages['toxicity_scores']['SEXUALLY_EXPLICIT']}
-                    <Progress
-                        type="circle"
-                        strokeColor={{
-                            "0%": "#108ee9",
-                            "100%": 'red'
-                        }}
-                        percent={parseInt(this.props.messages['toxicity_scores']['SEXUALLY_EXPLICIT']*100)}
-                    />
-
-
-                    TOXICITY: {this.props.messages['toxicity_scores']['FLIRTATION']}
-                    <Progress
-                        type="circle"
-                        strokeColor={{
-                            "0%": "#108ee9",
-                            "100%": 'red'
-                        }}
-                        percent={parseInt(this.props.messages['toxicity_scores']['FLIRTATION']*100)}
-                    />
-
-
+                    { Object.keys(stateMap).map( key =>
+                        <div style={{'display': 'flex', 'alignItems': 'center'}}>
+                            <div style={{'font-size': '25px', 'margin': '25px'}}>
+                                {stateMap[key]}
+                            </div>
+                            <div style={{'display': 'flex'}}>
+                                <Progress
+                                    type="circle"
+                                    strokeColor={{
+                                        "0%": "#108ee9",
+                                        "100%": 'red'
+                                    }}
+                                    width='60px'
+                                    height='60px'
+                                    percent={parseInt(this.props.messages['toxicity_scores'][key] * 100)}
+                                />
+                            </div>
+                        </div>
+                    )
+                    }
                 </div>
+
         );
     }
 }

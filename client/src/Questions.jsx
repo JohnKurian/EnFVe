@@ -1,5 +1,7 @@
-import {Input} from "antd";
+import {Card, Input} from "antd";
 import React, { useState, useEffect } from "react";
+import { QuestionCircleTwoTone } from '@ant-design/icons';
+
 const { TextArea } = Input;
 
 class Questions extends React.Component {
@@ -18,11 +20,14 @@ class Questions extends React.Component {
         return (
             <div>
             {
-                qa_pairs.map(message => <div
-                        style={{'display': 'flex', 'flex-direction': 'row', 'align-items': 'flex-start'}}>
-                        <div>{message['question']}</div>
-                        <div>{message['answer']}</div>
+                qa_pairs.map(message =>
+                    <Card style={{ width: 375 }}>
+                    <div
+                        style={{'display': 'flex', 'flex-direction': 'column', 'align-items': 'flex-start'}}>
+                        <div style={{'fontSize': '22px', 'marginBottom': '12px'}}> <QuestionCircleTwoTone /> {message['question']}</div>
+                        <b style={{'fontSize': '23px'}}>{message['answer']}</b>
                     </div>
+                    </Card>
                 )
             }
             </div>

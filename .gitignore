@@ -1,3 +1,9 @@
+BERT-Pair.tar.gz
+coreference_resolution/neuralcoref/build/temp.linux-x86_64-3.7/
+coreference_resolution/neuralcoref/neuralcoref/neuralcoref.cpython-37m-x86_64-linux-gnu.so
+nodesource_setup.sh
+
+
 /BERT-Pair/*
 /gear-model/*
 /albert_base_v1/

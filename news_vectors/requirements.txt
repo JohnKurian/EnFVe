@@ -1,0 +1,8 @@
+redis
+annoy
+google-cloud-bigquery
+spacy==2.1.3
+neuralcoref
+nltk
+tensorflow
+tensorflow_hub

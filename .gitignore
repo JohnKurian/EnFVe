@@ -59,3 +59,8 @@ yarn-debug.log*
 yarn-error.log*
 /client/package-lock.json
 /client/yarn.lock
+/news_vectors/dump.rdb
+/news_vectors/redis-stable.tar.gz
+/news_vectors/redis-stable/
+/news_vectors/article_100.index
+/news_vectors/embeddings.txt

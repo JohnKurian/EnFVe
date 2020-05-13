@@ -74,8 +74,8 @@ from scipy import spatial
 print('tf:')
 tf.executing_eagerly()
 
-module_url = "use_model"
-module_url = 'http://tfhub.dev/google/universal-sentence-encoder/4'
+# module_url = "use_model"
+module_url = "https://tfhub.dev/google/universal-sentence-encoder-large/5"
 use_model = hub.load(module_url)
 
 test_sentences = [

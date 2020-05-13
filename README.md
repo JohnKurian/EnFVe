@@ -1,5 +1,21 @@
 ## How to run
 
+# Start all servers using python3.7 start_api_servers.py
+# Test the APIs using tests.py
+# Start the socket_server
+# Start the UI server 
+
+python3.7 tests.py
+
+screen -S api_servers -dm python3.7 start_api_servers.py
+screen -S backend_server -dm python3.7 socket_server.py
+
+screen -S client npm start --prefix client
+
+
+
+
+
 cd to fnc_ucnlp folder
 Create a virtual environment fnc in it and then install from requirements.txt
 

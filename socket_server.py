@@ -60,6 +60,12 @@ def get_sentiment_analysis(claim):
     r = requests.post('http://0.0.0.0:9000/sentiment_analysis', json={'text': claim})
     return r.json()
 
+
+def get_roberta_stances(claim, evidences):
+    r = requests.post('http://0.0.0.0:14000/', json={'claim': claim, 'evidences': evidences})
+    return r.json()['stances']
+
+
 def get_results_gear_api(claim, evidences):
     r = requests.post('http://0.0.0.0:12000/', json={'claim': claim, 'evidences': evidences})
     argmax = r.json()['argmax']
@@ -172,6 +178,9 @@ def get_toxicity_scores(claim):
 
 @app.route('/test', methods=['GET', 'POST'])
 def answer():
+
+    USE_QUESTION_ANSWERING = False
+
     print('$$$$$$$$$$$$$$$ INSIDE ROUTE $$$$$$$$$$$$$$')
     print('something')
     msg = request.json['claim']
@@ -193,6 +202,8 @@ def answer():
 
     for claim in claims:
         evidences, paras, wiki_results, img_urls = get_evidences(claim)
+        stances = get_roberta_stances(claim, evidences)
+        print('roberta stances:', stances)
         argmax, evidences, vals = get_results_gear_api(claim, evidences)
         print('gear results:', argmax, vals)
         prediction_result = gear_result_names[argmax]
@@ -207,37 +218,50 @@ def answer():
                 'paras': paras,
                 'wiki_results': wiki_results,
                 'paras_joined': paras_joined,
-                'img_urls': img_urls
+                'img_urls': img_urls,
+                'stances': stances
             }
             gear_results.append(d)
 
-        questions, gold_answers = generate_questions(claim)
-        generated_questions = generated_questions + questions
+
+        if USE_QUESTION_ANSWERING:
+            questions, gold_answers = generate_questions(claim)
+            generated_questions = generated_questions + questions
 
 
-        for question in questions:
-            if len(paras_joined) > 0:
-                answer = retrieve_answer(question, paras_joined)
-                filtered_questions.append(question)
-                predicted_answers.append(answer)
+            for question in questions:
+                if len(paras_joined) > 0:
+                    answer = retrieve_answer(question, paras_joined)
+                    filtered_questions.append(question)
+                    predicted_answers.append(answer)
 
 
-    qa_pairs = []
-    for idx, question in enumerate(filtered_questions):
-        qa_pairs.append({'question': question, 'answer': predicted_answers[idx]})
+    if USE_QUESTION_ANSWERING:
+        qa_pairs = []
+        for idx, question in enumerate(filtered_questions):
+            qa_pairs.append({'question': question, 'answer': predicted_answers[idx]})
 
     toxicity_scores = get_toxicity_scores(claim)
 
     print('sending data..')
-    print('questions, answers', qa_pairs)
+
+    if USE_QUESTION_ANSWERING:
+        print('questions, answers', qa_pairs)
     print('gear_results:', gear_results)
     print('toxicity scores:', toxicity_scores)
 
     payload = {
-        'qa_pairs': qa_pairs,
         'gear_results': gear_results,
         'toxicity_scores': toxicity_scores
     }
+
+    if USE_QUESTION_ANSWERING:
+        payload = {
+            'qa_pairs': qa_pairs,
+            'gear_results': gear_results,
+            'toxicity_scores': toxicity_scores
+        }
+
     return Response(
                 json.dumps(payload),
                 mimetype='application/json',

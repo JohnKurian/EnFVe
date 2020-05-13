@@ -18,7 +18,8 @@ if __name__ == '__main__':
              "evidence_fetcher/server.py",
              "GEAR/server.py",
              "question_answering/server.py",
-             "QuestionGeneration/server.py"
+             "QuestionGeneration/server.py",
+             'roberta_stance_detection/server.py'
              ]
     for i in files:
         p = multiprocessing.Process(target=worker, args=(i,))

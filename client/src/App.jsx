@@ -174,7 +174,7 @@ const App = () => {
                 <Insights messages={messages}/>
             </div>
             <Evidences evidences={message}/>
-            <Questions messages={messages}/>
+{/*             <Questions messages={messages}/> */}
           </div>)
         }
 

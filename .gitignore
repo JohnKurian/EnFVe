@@ -59,3 +59,13 @@ yarn-debug.log*
 yarn-error.log*
 /client/package-lock.json
 /client/yarn.lock
+/redis-stable.tar.gz
+/dump.rdb
+/redis-stable/
+
+
+/twitter/notebooks/*.txt
+
+/twitter/notebooks/.ipynb_checkpoints/
+/twitter/images/graphfinal.png
+/twitter/notebooks/graphfinal.png

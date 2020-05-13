@@ -1,5 +1,8 @@
 ## Analysis of Twitter
 
+https://github.com/ugis22/analysing_twitter
+
+
 Read about this project in Medium:  
 
 -[How to build a PostgreSQL database to store tweets](https://towardsdatascience.com/how-to-build-a-postgresql-database-to-store-tweets-1be9c1d48c7)    

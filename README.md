@@ -1,3 +1,6 @@
+## Setting up the environment
+sh setup_environment.sh
+
 ## How to run
 
 # Start all servers using python3.7 start_api_servers.py

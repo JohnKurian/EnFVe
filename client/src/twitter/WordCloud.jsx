@@ -2,8 +2,6 @@ import React from "react";
 import ReactDOM from "react-dom";
 import ReactWordcloud from "react-wordcloud";
 
-import words from "./words";
-
 const options = {
     colors: ["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b"],
     enableTooltip: true,
@@ -25,8 +23,8 @@ class WordCloud extends React.Component {
     render() {
         return (
             <div>
-                <div style={{ height: 400, width: 600 }}>
-                    <ReactWordcloud options={options} words={words} />
+                <div style={{ height: 300, width: 400 }}>
+                    <ReactWordcloud options={options} words={this.props.hashtags} />
                 </div>
             </div>
         )

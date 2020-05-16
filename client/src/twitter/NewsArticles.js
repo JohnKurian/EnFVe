@@ -33,14 +33,9 @@ class NewsArticles extends React.Component {
                     onChange: page => {
                         console.log(page);
                     },
-                    pageSize: 3,
+                    pageSize: 5,
                 }}
-                dataSource={listData}
-                footer={
-                    <div>
-                        <b>ant design</b> footer part
-                    </div>
-                }
+                dataSource={this.props.articles}
                 renderItem={item => (
                     <List.Item
                         key={item.title}
@@ -53,12 +48,12 @@ class NewsArticles extends React.Component {
                             <img
                                 width={272}
                                 alt="logo"
-                                src="https://gw.alipayobjects.com/zos/rmsportal/mqaQswcyDLcXyDKnZfES.png"
+                                src={item.image}
                             />
                         }
                     >
                         <List.Item.Meta
-                            avatar={<Avatar src={item.avatar}/>}
+                            avatar={<Avatar src={item.favicon}/>}
                             title={<a href={item.href}>{item.title}</a>}
                             description={item.description}
                         />

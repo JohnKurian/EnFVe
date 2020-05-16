@@ -1,8 +1,9 @@
 import React from "react";
 import ReactDOM from "react-dom";
-import 'antd/dist/antd.css';
 import "./index.css";
+import 'antd/dist/antd.css';
 import App from "./App";
 import TwitterDashboard from "./TwitterDashboard"
+import BaseLayout from "./BaseLayout";
 
-ReactDOM.render(<TwitterDashboard />, document.getElementById("root"));
+ReactDOM.render(<BaseLayout/>, document.getElementById("root"));

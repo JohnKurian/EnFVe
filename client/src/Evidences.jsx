@@ -68,19 +68,20 @@ class Evidences extends React.Component {
             for (let i = 0; i < 5; i++) {
                 let link = "https://en.wikipedia.org/wiki/" + this.props.evidences.wiki_results[i]
                 evidences.push(
-                        <Card style={{ width: 500 }}>
+                        <Card style={{ width: '400px', 'fontSize':  this.props.style.fontSize }}>
 
                             <Meta
                                 avatar={<Avatar src={this.props.evidences.img_urls[i]} />}
-                                title={this.props.evidences.wiki_results[i]}
+                                title={<p><img style={{width: 30, height: 30, padding: '5px'}}
+                                               src={require('./icons8-wikipedia-50.png')}></img>{this.props.evidences.wiki_results[i]}</p>}
                             />
 
-                            <p><i>{this.props.evidences.paras_joined[i]}</i></p>
-                            <img style={{width: 30, height: 30, padding: '5px'}}
-                                 src={require('./icons8-wikipedia-50.png')}></img>
+                            <p><i>{this.props.evidences.evidences[i]}</i>
+
                             <a href={link} target="_blank">
                                 read more
                             </a>
+                            </p>
 
                         </Card>
                 )
@@ -88,7 +89,7 @@ class Evidences extends React.Component {
         }
         return (
 
-                    <div style={{'display': 'flex', 'flex-direction': 'column', 'align-items': 'center'}}>
+                    <div style={{'display': 'flex', 'flex-direction': 'column', 'align-items': 'center', 'overflow': 'hidden', 'overflowY': 'scroll', 'height': '350px'}}>
                         {evidences}
                         {/*{this.props.evidences!==undefined && this.props.evidences.length > 0 &&*/}
                         {/*this.props.evidences.paras.map(msg => (*/}

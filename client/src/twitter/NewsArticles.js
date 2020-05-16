@@ -2,6 +2,9 @@ import { List, Avatar, Space } from 'antd';
 import { MessageOutlined, LikeOutlined, StarOutlined } from '@ant-design/icons';
 import React from "react";
 
+import { Card } from 'antd';
+import { EditOutlined, EllipsisOutlined, SettingOutlined } from '@ant-design/icons';
+
 const listData = [];
 for (let i = 0; i < 23; i++) {
     listData.push({
@@ -22,48 +25,90 @@ const IconText = ({ icon, text }) => (
     </Space>
 );
 
-class NewsArticles extends React.Component {
+const { Meta } = Card;
+
+
+
+
+
+
+
+
+class NewsArticles extends React.Component{
 
     render() {
         return (
-            <List
-                itemLayout="vertical"
-                size="large"
-                pagination={{
-                    onChange: page => {
-                        console.log(page);
-                    },
-                    pageSize: 5,
-                }}
-                dataSource={this.props.articles}
-                renderItem={item => (
-                    <List.Item
-                        key={item.title}
-                        actions={[
-                            <IconText icon={StarOutlined} text="156" key="list-vertical-star-o"/>,
-                            <IconText icon={LikeOutlined} text="156" key="list-vertical-like-o"/>,
-                            <IconText icon={MessageOutlined} text="2" key="list-vertical-message"/>,
-                        ]}
-                        extra={
-                            <img
-                                width={272}
-                                alt="logo"
-                                src={item.image}
-                            />
-                        }
-                    >
-                        <List.Item.Meta
-                            avatar={<Avatar src={item.favicon}/>}
-                            title={<a href={item.href}>{item.title}</a>}
-                            description={item.description}
-                        />
-                        {item.content}
-                    </List.Item>
-                )}
-            />
-
+                this.props.articles.map((article, index) => (
+            <Card
+                onClick={()=> window.open(article.url, "_blank")}
+                hoverable
+                style={{ width: 400, 'marginRight': '10px' }}
+                cover={
+                    <img
+                        alt="example"
+                        height='200px'
+                        width='100%'
+                        src={article.image}
+                    />
+                }
+                actions={[
+                    <SettingOutlined key="setting" />,
+                    <EditOutlined key="edit" />,
+                    <EllipsisOutlined key="ellipsis" />,
+                ]}
+            >
+                <Meta
+                    avatar={<Avatar src={article.favicon} />}
+                    title={article.title}
+                    description={article.description.substring(0, 100)}
+                />
+            </Card>
+                ))
         )
     }
+
 }
+//
+// class NewsArticles extends React.Component {
+//
+//     render() {
+//         return (
+//             <List
+//                 itemLayout="vertical"
+//                 size="large"
+//                 pagination={{
+//                     onChange: page => {
+//                         console.log(page);
+//                     },
+//                     pageSize: 5,
+//                 }}
+//                 dataSource={this.props.articles}
+//                 renderItem={item => (
+//                     <List.Item
+//                         key={item.title}
+//                         actions={[
+//                             <IconText icon={StarOutlined} text={item.share_count} key="list-vertical-star-o"/>
+//                         ]}
+//                         extra={
+//                             <img
+//                                 width={272}
+//                                 alt="logo"
+//                                 src={item.image}
+//                             />
+//                         }
+//                     >
+//                         <List.Item.Meta
+//                             avatar={<Avatar src={item.favicon}/>}
+//                             title={<a href={item.href}>{item.title}</a>}
+//                             description={item.description}
+//                         />
+//                         {item.content}
+//                     </List.Item>
+//                 )}
+//             />
+//
+//         )
+//     }
+// }
 
 export default NewsArticles;

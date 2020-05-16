@@ -10,12 +10,13 @@ class Influencer extends React.Component {
     }
     render() {
         return (
-            <Card style={{ width: 300 }}>
-
+            <Card style={{ width: 300, 'margin': '10px' }}>
+                <div style={{'flex': 1, 'flexDirection': 'row'}}>
                 <p><Avatar src={this.props.influencer.profile_image_url} /> {this.props.influencer.name} <TwitterOutlined onClick={()=> window.open('https://twitter.com/'+this.props.influencer.screen_name, "_blank")}/></p>
-                <p>@{this.props.influencer.screen_name}</p>
-                <p>{this.props.influencer.description}</p>
+                </div>
+                <p style={{'fontSize': '12px'}}>{this.props.influencer.description}</p>
                 <p>{this.props.influencer.followers_count} followers</p>
+
             </Card>
         );
     }

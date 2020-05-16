@@ -127,6 +127,12 @@ print(get_roberta_stances(claim, evidences))
 print(get_results_gear_api(claim, evidences))
 print(get_toxicity_scores(claim))
 
-print('all tests ran successfully.')
+print('all api tests ran successfully.')
+print('testing main backend server..')
 
+def get_fact_check_prediction(claim):
+    r = requests.post('http://0.0.0.0:5000/test', json={'claim': claim})
+    return r.json()
 
+print(get_fact_check_prediction(claim))
+print('backend server test successful.')

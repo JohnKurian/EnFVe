@@ -173,7 +173,7 @@ const App = () => {
               <ResultsGraph evidences={message}/>
                 <Insights messages={messages}/>
             </div>
-            <Evidences evidences={message}/>
+            <Evidences evidences={message} />
 {/*             <Questions messages={messages}/> */}
           </div>)
         }

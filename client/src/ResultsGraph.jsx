@@ -34,7 +34,7 @@ class ResultsGraph extends React.Component {
 
         return (
             <div>
-                <BarChart width={345} height={240} data={data}>
+                <BarChart width={250} height={150} data={data}>
                     <Bar dataKey='uv' onClick={this.handleClick}>
                         {
                             data.map((entry, index) => (

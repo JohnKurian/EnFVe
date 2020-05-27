@@ -74,3 +74,6 @@ yarn-error.log*
 /twitter/notebooks/.ipynb_checkpoints/
 /twitter/images/graphfinal.png
 /twitter/notebooks/graphfinal.png
+/twitter/hashtags.txt
+/twitter/jobs.txt
+/twitter/tweets.txt

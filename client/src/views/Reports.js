@@ -4,13 +4,15 @@ import { QuestionCircleTwoTone } from '@ant-design/icons';
 import {NavLink as RouterNavLink} from "react-router-dom";
 import {NavLink} from "reactstrap";
 
-const axios = require('axios')
+
 
 import {
     BrowserRouter as Router,
     Link,
     Route // for later
 } from 'react-router-dom'
+
+const axios = require('axios')
 
 const { TextArea } = Input;
 

@@ -134,5 +134,11 @@ def get_fact_check_prediction(claim):
     r = requests.post('http://0.0.0.0:5000/test', json={'claim': claim})
     return r.json()
 
+claim = 'Lockheed Martin is developing a hybrid airship'
+# evidences = get_evidences(claim)
+print(get_fact_check_prediction(claim))
+
+
+claim = 'norway has one of the smallest gaps between rich and poor'
 print(get_fact_check_prediction(claim))
 print('backend server test successful.')

@@ -15,7 +15,7 @@ screen -S backend_server -dm python3.7 socket_server.py
 
 screen -S client npm start --prefix client
 
-
+screen -S mongod -dm mongod --dbpath /usr/local/var/mongodb
 
 
 

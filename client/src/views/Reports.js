@@ -4,6 +4,8 @@ import { QuestionCircleTwoTone } from '@ant-design/icons';
 import {NavLink as RouterNavLink} from "react-router-dom";
 import {NavLink} from "reactstrap";
 
+const axios = require('axios')
+
 import {
     BrowserRouter as Router,
     Link,
@@ -24,6 +26,10 @@ class Reports extends React.Component {
     state = {
         value: '',
     };
+
+    componentDidMount() {
+        document.title = `You clicked ${this.state.count} times`;
+    }
 
     onChange = ({ target: { value } }) => {
         this.setState({ value });

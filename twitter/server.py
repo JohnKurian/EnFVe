@@ -88,13 +88,17 @@ def update_user():
 @app.route('/get_reports', methods=['GET', 'POST'])
 def get_reports_for_user():
     user = request.json['user']
-    report = request.json['report']
+    # report = request.json['report']
 
     report_list = []
     reports  = nexus.reports.find({'user.sub': user['sub']})
 
     for report in reports:
-        report_list.append(report)
+        print(report)
+        temp_report = {}
+        temp_report['id'] = report['id']
+        temp_report['hashtags'] = report['hashtags']
+        report_list.append(temp_report)
 
     return Response(
         json.dumps({'reports': report_list}),

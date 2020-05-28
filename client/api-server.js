@@ -12,7 +12,7 @@ const app = express();
 
 const port = process.env.API_PORT || 3001;
 const appPort = process.env.SERVER_PORT || 3000;
-const appOrigin = authConfig.appOrigin || `http://127.0.0.1:${appPort}`;
+const appOrigin = authConfig.appOrigin || `http://localhost:${appPort}`;
 
 if (!authConfig.domain || !authConfig.audience) {
   throw new Error(
@@ -48,29 +48,20 @@ app.post("/api/external", checkJwt, (req, res) => {
 
 
 app.post("/api/get_reports", checkJwt, (req, res) => {
-  console.log(req.user)
-  console.log(req.body)
+  console.log('user:', req.user)
+  // console.log(req.body)
   axios.post('http://0.0.0.0:16000/get_reports', {
-    hashtags: req.body.hashtags,
-    user: req.body.user
+    user: req.user
   })
       .then((resp) => {
-        console.log(`statusCode: ${resp.statusCode}`)
+          console.log(resp.data['reports'])
         res.send({
-            reports: resp['report_list']
+            reports: resp.data['reports']
           });
-
-        // console.log(res)
       })
       .catch((error) => {
-        console.error(error)
+        console.error('error:', error)
       })
-
-
-
-  res.send({
-    msg: "Your access token was successfully validated!"
-  });
 });
 
 

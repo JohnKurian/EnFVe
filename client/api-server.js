@@ -66,6 +66,25 @@ app.post("/api/get_reports", checkJwt, (req, res) => {
 
 
 
+app.post("/api/get_report", checkJwt, (req, res) => {
+    console.log('report:', req.body.report_id)
+    // console.log(req.body)
+    axios.post('http://0.0.0.0:16000/get_report', {
+        report_id: req.body.report_id
+    })
+        .then((resp) => {
+            console.log(resp.data['report'])
+            res.send({
+                report: resp.data['report']
+            });
+        })
+        .catch((error) => {
+            console.error('error:', error)
+        })
+});
+
+
+
 app.post("/api/createreport", checkJwt, (req, res) => {
   console.log(req.body)
   const axios = require('axios')

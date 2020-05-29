@@ -84,6 +84,23 @@ def update_user():
     )
 
 
+@app.route('/get_report', methods=['GET', 'POST'])
+def get_report():
+    print(request.json)
+    report_id = request.json['report_id']
+    print(request)
+    report = nexus.reports.find_one({'id': report_id})
+    del report['_id']
+
+    return Response(
+        json.dumps({'report': report}),
+        mimetype='application/json',
+        headers={
+            'Cache-Control': 'no-cache',
+            'Access-Control-Allow-Origin': '*'
+        }
+    )
+
 
 @app.route('/get_reports', methods=['GET', 'POST'])
 def get_reports_for_user():

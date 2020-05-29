@@ -60,7 +60,7 @@ class NewsArticles extends React.Component{
                 <Meta
                     avatar={<Avatar src={article.favicon} />}
                     title={article.title}
-                    description={article.description.substring(0, 100)}
+                    description={article.description ? article.description.substring(0, 100): ''}
                 />
             </Card>
                 ))

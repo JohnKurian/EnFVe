@@ -19,7 +19,8 @@ if __name__ == '__main__':
              "GEAR/server.py",
              "question_answering/server.py",
              "QuestionGeneration/server.py",
-             'roberta_stance_detection/server.py'
+             'roberta_stance_detection/server.py',
+             'twitter/server.py'
              ]
     for i in files:
         p = multiprocessing.Process(target=worker, args=(i,))

@@ -12,10 +12,12 @@ python3.7 tests.py
 
 screen -S api_servers -dm python3.7 start_api_servers.py
 screen -S backend_server -dm python3.7 socket_server.py
-
 screen -S client npm start --prefix client
 
 screen -S mongod -dm mongod --dbpath /usr/local/var/mongodb
+screen -S rabbitmq rabbitmq-server
+screen -S twitter_tasks cd twitter && celery -A tasks worker --loglevel=INFO
+screen -S twitter_scheduled_tasks cd twitter && celery -A tasks beat --loglevel=INFO
 
 
 

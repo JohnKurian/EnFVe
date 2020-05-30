@@ -77,3 +77,4 @@ yarn-error.log*
 /twitter/hashtags.txt
 /twitter/jobs.txt
 /twitter/tweets.txt
+/twitter/celerybeat.pid

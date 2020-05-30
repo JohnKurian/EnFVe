@@ -103,7 +103,7 @@ const TwitterDashboard = (props) => {
     return (
         <div>
         {report && <div>
-            <Title>#insurance</Title>
+            <Title>{report.hashtags[0]}</Title>
             <div style={{'display': 'flex', 'flexDirection': 'row', 'justifyContent': 'space-around'}}>
                 <div>
                     {/*<ReportEditor/>*/}

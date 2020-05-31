@@ -180,7 +180,12 @@ def update_report():
     users = nexus["users"]
     reports = nexus["reports"]
 
-    reps = reports.find({'user.sub': 'google-oauth2|110224375451341506987'})
+    users = nexus["users"].find({})
+    queries = []
+    for user in users:
+        print(user['sub'])
+        queries.append({'$match': {"user.sub": user['sub']}})
+    reps = nexus.reports.aggregate(queries)
 
     hashtags_list = []
     for r in reps:

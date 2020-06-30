@@ -17,10 +17,10 @@ import tweepy
 import json
 
 #Importing twitter credentials
-consumer_key = "jjSz1RE4ftTNmqB1XuUTM22Fc"
-consumer_secret = "5SNWrhQStzMp3UDwVY7YGuEofQ4QOBBP4rOo4hGnhKpdFQoVi9"
-access_token = "68979886-IzdibLmYAx39y8PLNWA7kLPKl2rTDlLPCnf557I45"
-access_token_secret = "tjVsF4mx4vS9JO0hPcS7b8qoP7oIZK1A8nX0aMwhkNEDG"
+consumer_key = "consumer_key"
+consumer_secret = "consumer_secret"
+access_token = "access_token"
+access_token_secret = "access_token_secret"
 
 import pandas as pd
 #handling data

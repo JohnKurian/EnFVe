@@ -88,6 +88,14 @@ def get_results_gear_api(claim, evidences):
     print('gear results:', r.json())
     return argmax, evidences, vals
 
+def get_results_transformer_xh_api(claim, evidences):
+    r = requests.post('http://0.0.0.0:17000/', json={'claim': claim, 'evidences': evidences})
+    argmax = r.json()['argmax']
+    evidences =r.json()['evidences']
+    vals = r.json()['vals']
+    print('gear results:', r.json())
+    return argmax, evidences, vals
+
 
 def get_toxicity_scores(claim):
     api_key = 'AIzaSyBTrtgnaWeBx7Z-BMzVS3rL6REJFaaKxaM'
@@ -125,6 +133,7 @@ print(generate_questions(claim))
 print(retrieve_answer(question, evidences))
 print(get_roberta_stances(claim, evidences))
 print(get_results_gear_api(claim, evidences))
+print(get_results_transformer_xh_api(claim, evidences))
 print(get_toxicity_scores(claim))
 
 print('all api tests ran successfully.')

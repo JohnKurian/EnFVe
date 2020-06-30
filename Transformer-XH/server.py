@@ -12,15 +12,21 @@ import dgl
 
 from pytorch_transformers.file_utils import PYTORCH_PRETRAINED_BERT_CACHE
 
-from data import FEVERDataset
+# from data import FEVERDataset
 from torch.utils.data import DataLoader
 from pytorch_transformers.modeling_bert import BertModel, BertEncoder, BertPreTrainedModel
+from pytorch_pretrained_bert.tokenization import BertTokenizer
 import torch.nn as nn
 import logging
 from tqdm import tqdm
 import json
 import torch
 
+from flask import Flask, Response, request
+import json
+
+
+app = Flask(__name__)
 
 def normalize(text):
     """Resolve different type of unicode encodings."""
@@ -384,18 +390,20 @@ def batcher_fever(device):
 
 
 
-# tokenizer = BertTokenizer.from_pretrained(config["bert_token_file"])
-#
-# model = Model_FEVER(config)
-# # model.half()
-# model.network.to(torch.device("cpu"))
-#
-# model.load('transformer_xh_model/model_finetuned_epoch_0.pt')
-# config = json.load(open('configs/config_fever.json', 'r', encoding="utf-8"))
+tokenizer = BertTokenizer.from_pretrained(config["bert_token_file"])
+
+model = Model_FEVER(config)
+# model.half()
+model.network.to(torch.device("cpu"))
+
+model.load('transformer_xh_model/model_finetuned_epoch_0.pt')
+config = json.load(open('configs/config_fever.json', 'r', encoding="utf-8"))
 
 
-
-def get_results_transformer_xh(claim, evidences):
+@app.route('/', methods=['GET', 'POST'])
+def get_results_transformer_xh():
+    claim = request.json['claim']
+    evidences = request.json['evidences']
     json_obj = {}
     json_obj['qid'] = 0
     json_obj['label'] = 'SUPPORTS'
@@ -424,3 +432,11 @@ def get_results_transformer_xh(claim, evidences):
     argmax = np.argmax(final_score)
 
     return argmax, evidences, final_score
+
+
+app.run(
+        host='0.0.0.0',
+        port=17000,
+        debug=False,
+        threaded=True
+    )

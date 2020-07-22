@@ -59,7 +59,7 @@ def eval_model(model, label_list, validset_reader, outdir, name):
                 f.write(json.dumps(instance) + "\n")
 
 def get_results_kgat():
-  results_path = "/content/KernelGAT/outputtest_1.json"
+  results_path = outdir + name
   with open(results_path, "w") as f:
         for index, data in enumerate(validset_reader):
             inputs, ids = data

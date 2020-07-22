@@ -21,7 +21,7 @@ from models import inference_model
 from flask_socketio import SocketIO, send
 from flask import Flask, Response
 
-app = Flask(__name__)
+#app = Flask(__name__)
 logger = logging.getLogger(__name__)
 
 def input():
@@ -125,8 +125,8 @@ if __name__ == "__main__":
     print("\n")
     get_results_kgat()
 
-@app.route('/', methods=['GET', 'POST'])
 '''
+@app.route('/', methods=['GET', 'POST'])
 def answer():
     claim = request.json['claim']
     evidences = request.json['evidences']
@@ -144,7 +144,6 @@ def answer():
                     'Access-Control-Allow-Origin': '*'
                 }
             )
-'''
 
 app.run(
         host='0.0.0.0',
@@ -152,3 +151,4 @@ app.run(
         debug=False,
         threaded=True
     )
+'''

@@ -63,12 +63,12 @@ class inference_model(nn.Module):
             Linear(128, 1)
         )
         self.proj_select = nn.Linear(self.kernel, 1)
-        self.mu = Variable(torch.FloatTensor(kernal_mus(self.kernel)), requires_grad = False).view(1, 1, 1, 21).cuda()
-        self.sigma = Variable(torch.FloatTensor(kernel_sigmas(self.kernel)), requires_grad = False).view(1, 1, 1, 21).cuda()
+        self.mu = Variable(torch.FloatTensor(kernal_mus(self.kernel)), requires_grad = False).view(1, 1, 1, 21)
+        self.sigma = Variable(torch.FloatTensor(kernel_sigmas(self.kernel)), requires_grad = False).view(1, 1, 1, 21)
 
 
     def self_attention(self, inputs, inputs_hiddens, mask, mask_evidence, index):
-        idx = torch.LongTensor([index]).cuda()
+        idx = torch.LongTensor([index])
         mask = mask.view([-1, self.evi_num, self.max_len])
         mask_evidence = mask_evidence.view([-1, self.evi_num, self.max_len])
         own_hidden = torch.index_select(inputs_hiddens, 1, idx)
@@ -102,7 +102,7 @@ class inference_model(nn.Module):
         attn_q = attn_q.view(attn_q.size()[0], attn_q.size()[1], 1)
         attn_d = attn_d.view(attn_d.size()[0], 1, attn_d.size()[1], 1)
         sim = torch.bmm(q_embed, torch.transpose(d_embed, 1, 2)).view(q_embed.size()[0], q_embed.size()[1], d_embed.size()[1], 1)
-        pooling_value = torch.exp((- ((sim - self.mu.cuda()) ** 2) / (self.sigma.cuda() ** 2) / 2)) * attn_d
+        pooling_value = torch.exp((- ((sim - self.mu) ** 2) / (self.sigma ** 2) / 2)) * attn_d
         pooling_sum = torch.sum(pooling_value, 2)
         log_pooling_sum = torch.log(torch.clamp(pooling_sum, min=1e-10)) * attn_q
         log_pooling_sum = torch.sum(log_pooling_sum, 1) / (torch.sum(attn_q, 1) + 1e-10)
@@ -113,7 +113,7 @@ class inference_model(nn.Module):
         attn_q = attn_q.view(attn_q.size()[0], attn_q.size()[1])
         attn_d = attn_d.view(attn_d.size()[0], 1, attn_d.size()[1], 1)
         sim = torch.bmm(q_embed, torch.transpose(d_embed, 1, 2)).view(q_embed.size()[0], q_embed.size()[1], d_embed.size()[1], 1)
-        pooling_value = torch.exp((- ((sim - self.mu.cuda()) ** 2) / (self.sigma.cuda() ** 2) / 2)) * attn_d
+        pooling_value = torch.exp((- ((sim - self.mu) ** 2) / (self.sigma ** 2) / 2)) * attn_d
         log_pooling_sum = torch.sum(pooling_value, 2)
         log_pooling_sum = torch.log(torch.clamp(log_pooling_sum, min=1e-10))
         log_pooling_sum = self.proj_att(log_pooling_sum).squeeze(-1)

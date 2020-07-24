@@ -82,7 +82,7 @@ class BertForQuestionAnsweringConfidence(BertPreTrainedModel):
 
             else:
                 # You care about the span only when switch is 0
-                span_mask = (switch_list == 0).type(torch.FloatTensor).cuda()
+                span_mask = (switch_list == 0).type(torch.FloatTensor)
                 start_losses = loss_fct(
                     start_logits, start_positions) * span_mask
                 end_losses = loss_fct(end_logits, end_positions) * span_mask

@@ -161,8 +161,8 @@ class ConllEvaluator(object):
     def get_max_score(self, batch, debug=False):
         inputs, mask = batch
         if self.cuda:
-            inputs = tuple(i.cuda() for i in inputs)
-            mask = mask.cuda()
+            inputs = tuple(i for i in inputs)
+            mask = mask
         self.model.eval()
         with torch.no_grad():
             scores = self.model(inputs, concat_axis=1)

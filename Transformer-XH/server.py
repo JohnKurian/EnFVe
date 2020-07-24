@@ -1,4 +1,4 @@
-from flask_socketio import SocketIO, send
+# from flask_socketio import SocketIO, send
 from flask import Flask, Response
 import requests
 
@@ -12,7 +12,7 @@ import dgl
 
 from pytorch_transformers.file_utils import PYTORCH_PRETRAINED_BERT_CACHE
 
-# from data import FEVERDataset
+from fever import FEVERDataset
 from torch.utils.data import DataLoader
 from pytorch_transformers.modeling_bert import BertModel, BertEncoder, BertPreTrainedModel
 from pytorch_pretrained_bert.tokenization import BertTokenizer
@@ -213,8 +213,8 @@ class ModelHelper(BertPreTrainedModel):
         self.config_model = config_model
         self.node_dropout = nn.Dropout(self.config.hidden_dropout_prob)
         self.final_layer = nn.Linear(self.config.hidden_size, 1)
-        self.final_layer.apply(self.init_weights)
-        # self.init_weights()
+        # self.final_layer.apply(self.init_weights)
+        self.init_weights()
 
     def forward(self, batch, device):
         pass
@@ -255,8 +255,8 @@ class ModelHelper_FEVER(ModelHelper):
     def __init__(self, node_encoder, bert_config, config_model):
         super(ModelHelper_FEVER, self).__init__(node_encoder, bert_config, config_model)
         self.pred_final_layer = nn.Linear(self.config.hidden_size, 3)
-        self.pred_final_layer.apply(self.init_weights)
-        # self.init_weights()
+        # self.pred_final_layer.apply(self.init_weights)
+        self.init_weights()
 
     def forward(self, batch, device):
         ### Transformer-XH for node representations
@@ -329,7 +329,7 @@ config = {'name': 'transformer_xh_fever', 'task': 'fever',
                                 'gnn_head': 12}}
 
 
-def evaluation_fever(model, config, tokenizer, json_obj, inference=False):
+def evaluation_fever(model, config, tokenizer, json_obj, inference=True):
     dataset = FEVERDataset(json_obj, config["model"], False, tokenizer)
     dataloader = DataLoader(dataset=dataset,
                             batch_size=config['training']['test_batch_size'],
@@ -364,14 +364,17 @@ def evaluation_fever(model, config, tokenizer, json_obj, inference=False):
         #     [1.3626e-03, 2.4511e-05, 9.9861e-01], grad_fn= < SqueezeBackward1 >)
 
         values, index = final_score.topk(1)
+        print(values, index)
 
         print('final score:', index[0].item())
+        print('final score list', final_score.tolist())
+
 
         final_score = final_score.tolist()
 
-        pred_dict = index[0].item()
+        # pred_dict = index[0].item()
 
-    return pred_dict, logits_score, final_score
+    return  index[0].item(), final_score
 
 
 def batcher_fever(device):
@@ -396,8 +399,8 @@ model = Model_FEVER(config)
 # model.half()
 model.network.to(torch.device("cpu"))
 
-model.load('transformer_xh_model/model_finetuned_epoch_0.pt')
-config = json.load(open('configs/config_fever.json', 'r', encoding="utf-8"))
+model.load('../transformer_xh_model/model_finetuned_epoch_0.pt')
+# config = json.load(open('configs/config_fever.json', 'r', encoding="utf-8"))
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -425,13 +428,20 @@ def get_results_transformer_xh():
 
     print('json batch:', json_batch)
 
-    print('im also here')
-    pred_dict, logits_score, final_score = evaluation_fever(model, config, tokenizer, json_batch, False)
-    logits_score = logits_score.tolist()
+    pred, logits = evaluation_fever(model, config, tokenizer, json_batch, False)
+    # logits_score = logits_score.tolist()
 
-    argmax = np.argmax(final_score)
+    # argmax = np.argmax(final_score)
 
-    return argmax, evidences, final_score
+
+    return Response(
+                json.dumps({'logits': logits, 'pred': pred}),
+                mimetype='application/json',
+                headers={
+                    'Cache-Control': 'no-cache',
+                    'Access-Control-Allow-Origin': '*'
+                }
+            )
 
 
 app.run(

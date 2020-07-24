@@ -670,6 +670,8 @@ def get_roberta_preds(claim, evidences):
 
 @app.route('/', methods=['GET', 'POST'])
 def get_evidences_use_annoy():
+    GROUND_TRUTH = 'Wikipedia'
+    USE_ANNOY = True
     print('req:', request.json)
     claim = request.json['claim']
     filtered_lines, wiki_results = doc_retrieval(claim)
@@ -684,11 +686,28 @@ def get_evidences_use_annoy():
     claim_embedding = use_model([claim])
     print('numpy distance..')
 
-    distances = [np.linalg.norm(a - claim_embedding) for a in embeddings]
-    idxs = np.argsort(distances)[::-1][-5:]
-    nns = idxs.tolist()
+
+    nns = []
+
+
+    if GROUND_TRUTH == "Wikipedia" and USE_ANNOY:
+        u = AnnoyIndex(40, 'angular')
+        u.load('wikipedia.ann')
+        nns = u.get_nns_by_vector(claim_embedding[0], 5)
+    elif GROUND_TRUTH == "News Articles" and USE_ANNOY:
+        u = AnnoyIndex(40, 'angular')
+        u.load('news_articles.ann')
+        nns = u.get_nns_by_vector(claim_embedding[0], 5)
+    elif GROUND_TRUTH == "Wikipedia" and not USE_ANNOY:
+        distances = [np.linalg.norm(a - claim_embedding) for a in embeddings]
+        idxs = np.argsort(distances)[::-1][-5:]
+        nns = idxs.tolist()
+
+
 
     nns.reverse()
+
+
 
 
     wiki_results_filtered = [wiki_results[n] for n in nns ]

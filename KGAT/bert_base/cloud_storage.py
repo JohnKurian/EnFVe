@@ -2,19 +2,19 @@ import requests
 
 url = 'https://storage.googleapis.com/kgat_saved_model/vocab.txt'
 r = requests.get(url, allow_redirects=True)
-open('EnFVe/KGAT/bert_base/vocab.txt', 'wb').write(r.content)
+open('vocab.txt', 'wb').write(r.content)
 
 url = 'https://storage.googleapis.com/kgat_saved_model/bert_config.json'
 r = requests.get(url, allow_redirects=True)
-open('EnFVe/KGAT/bert_base/bert_config.json', 'wb').write(r.content)
+open('bert_config.json', 'wb').write(r.content)
 
 url = 'https://storage.googleapis.com/kgat_saved_model/pytorch_model.bin'
 r = requests.get(url, allow_redirects=True)
-open('EnFVe/KGAT/bert_base/pytorch_model.bin', 'wb').write(r.content)
+open('pytorch_model.bin', 'wb').write(r.content)
 
 url = 'https://storage.googleapis.com/kgat_saved_model/model.best.pt'
 r = requests.get(url, allow_redirects=True)
-open('EnFVe/KGAT/model.best.pt', 'wb').write(r.content)
+open('../model.best.pt', 'wb').write(r.content)
 
 '''
 import os

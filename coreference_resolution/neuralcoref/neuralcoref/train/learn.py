@@ -150,7 +150,7 @@ def run_model(args):
     )
     model.load_embeddings(tensor_embeddings)
     if args.cuda:
-        model.cuda()
+        model
     if args.weights is not None:
         print("🏝 Loading pre-trained weights")
         model.load_weights(args.weights)
@@ -240,8 +240,8 @@ def run_model(args):
                 inputs = tuple(Variable(inp, requires_grad=False) for inp in inputs)
                 targets = tuple(Variable(tar, requires_grad=False) for tar in targets)
                 if args.cuda:
-                    inputs = tuple(i.cuda() for i in inputs)
-                    targets = tuple(t.cuda() for t in targets)
+                    inputs = tuple(i for i in inputs)
+                    targets = tuple(t for t in targets)
                 scores = model(inputs)
                 if debug is not None and (debug == -1 or debug in m_idx):
                     print(

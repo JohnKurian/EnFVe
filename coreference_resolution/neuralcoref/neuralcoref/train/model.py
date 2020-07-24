@@ -96,7 +96,7 @@ class Model(nn.Module):
             spans, words, single_features = inputs
         words = words.type(torch.LongTensor)
         if torch.cuda.is_available():
-            words = words.cuda()
+            words = words
         embed_words = self.drop(self.word_embeds(words).view(words.size()[0], -1))
         single_input = torch.cat([spans, embed_words, single_features], 1)
         single_scores = self.single_top(single_input)
@@ -105,8 +105,8 @@ class Model(nn.Module):
             ant_words_long = ant_words.view(batchsize, -1).type(torch.LongTensor)
             ana_words_long = ana_words.view(batchsize, -1).type(torch.LongTensor)
             if torch.cuda.is_available():
-                ant_words_long = ant_words_long.cuda()
-                ana_words_long = ana_words_long.cuda()
+                ant_words_long = ant_words_long
+                ana_words_long = ana_words_long
             ant_embed_words = self.drop(
                 self.word_embeds(ant_words_long).view(batchsize, pairs_num, -1)
             )

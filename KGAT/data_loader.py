@@ -180,10 +180,10 @@ class DataLoader(object):
             lab_tensor = Variable(
                 torch.LongTensor(labels))
             if self.cuda:
-                inp_tensor_input = inp_tensor_input.cuda()
-                msk_tensor_input = msk_tensor_input.cuda()
-                seg_tensor_input = seg_tensor_input.cuda()
-                lab_tensor = lab_tensor.cuda()
+                inp_tensor_input = inp_tensor_input
+                msk_tensor_input = msk_tensor_input
+                seg_tensor_input = seg_tensor_input
+                lab_tensor = lab_tensor
             self.step += 1
             return (inp_tensor_input, msk_tensor_input, seg_tensor_input), lab_tensor
         else:
@@ -288,9 +288,9 @@ class DataLoaderTest(object):
                 torch.LongTensor(seg_padding_inputs))
 
             if self.cuda:
-                inp_tensor_input = inp_tensor_input.cuda()
-                msk_tensor_input = msk_tensor_input.cuda()
-                seg_tensor_input = seg_tensor_input.cuda()
+                inp_tensor_input = inp_tensor_input
+                msk_tensor_input = msk_tensor_input
+                seg_tensor_input = seg_tensor_input
 
             self.step += 1
             return (inp_tensor_input, msk_tensor_input, seg_tensor_input), ids

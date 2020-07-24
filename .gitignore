@@ -78,3 +78,14 @@ yarn-error.log*
 /twitter/jobs.txt
 /twitter/tweets.txt
 /twitter/celerybeat.pid
+twitter/notebooks/get_user_details.ipynb
+twitter/notebooks/julian_teicke.json
+twitter/notebooks/teicke.json
+twitter/notebooks/tweets.json
+wikiextractor/article_full.index
+fever_predicted_datasets/*
+KGAT/model.best.pt
+KGAT/bert_base/vocab.txt
+KGAT/bert_test_1.json
+KGAT/output_newoutput.json
+ensembler/ensemble_model.txt

@@ -106,33 +106,7 @@ def get_kgat_results_api(claim, evidences):
     return argmax, evidences, vals
 
 
-def get_toxicity_scores(claim):
-    api_key = 'AIzaSyBTrtgnaWeBx7Z-BMzVS3rL6REJFaaKxaM'
-    url = ('https://commentanalyzer.googleapis.com/v1alpha1/comments:analyze' +
-           '?key=' + api_key)
-    data_dict = {
-        'comment': {'text': claim},
-        'languages': ['en'],
-        'requestedAttributes': {'TOXICITY': {},
-                                'SEVERE_TOXICITY': {},
-                                'IDENTITY_ATTACK': {},
-                                'INSULT': {},
-                                'PROFANITY': {},
-                                'THREAT': {},
-                                'SEXUALLY_EXPLICIT': {},
-                                'FLIRTATION': {}}
-    }
-    response = requests.post(url=url, data=json.dumps(data_dict))
-    response_dict = json.loads(response.content)
-    attributes = list(response_dict['attributeScores'])
-    scores = [item['summaryScore']['value'] for item in list(response_dict['attributeScores'].values())]
 
-    toxicity_scores = {}
-    for i in range(len(attributes)):
-        toxicity_scores[attributes[i]] = round(scores[i], 2)
-        print(f"{attributes[i]}: {round(scores[i], 2)}")
-
-    return toxicity_scores
 
 
 print(get_evidences(claim))
@@ -143,7 +117,6 @@ print(retrieve_answer(question, evidences))
 print(get_roberta_stances(claim, evidences))
 print(get_results_gear_api(claim, evidences))
 print(get_results_transformer_xh_api(claim, evidences))
-print(get_toxicity_scores(claim))
 
 print('all api tests ran successfully.')
 print('testing main backend server..')

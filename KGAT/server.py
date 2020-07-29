@@ -18,11 +18,12 @@ import argparse
 import numpy as np
 from models import inference_model
 import time
+import requests
 
 # from flask_socketio import SocketIO, send
-from flask import Flask, Response
+from flask import Flask, Response, request
 
-#app = Flask(__name__)
+app = Flask(__name__)
 logger = logging.getLogger(__name__)
 
 
@@ -101,29 +102,27 @@ def eval_model(model, label_list, validset_reader, outdir, name):
             preds = logits.max(1)[1].tolist()
             print('logits:', logits.detach().numpy().tolist()[0])
             print(preds)
+            logits = logits.detach().numpy().tolist()[0]
             assert len(preds) == len(ids)
             for step in range(len(preds)):
               print("ID: ", ids[step])
-              print("Claim: ", claim)
+              # print("Claim: ", claim)
               print("Prediction: ", label_list[preds[step]])
-              return claim, label_list[preds[step]]
+              return preds, label_list[preds[step]], logits
             #   instance = {"id": ids[step], "predicted_label": label_list[preds[step]]}
             #   f.write(json.dumps(instance) + "\n")
 
-def get_results_kgat(outdir, name):
-  results_path = outdir + name
-  with open(results_path, "w") as f:
-        for index, data in enumerate(validset_reader):
-            inputs, ids = data
-            logits = model(inputs)
-            preds = logits.max(1)[1].tolist()
-            assert len(preds) == len(ids)
-            for step in range(len(preds)):
-              print("ID: ", ids[step])
-              print("Claim: ", claim)
-              print("Prediction: ", label_list[preds[step]])
 
-if __name__ == "__main__":
+    
+
+
+@app.route('/', methods=['GET', 'POST'])
+def answer():
+    claim = request.json['claim']
+    evidences = request.json['evidences']
+    # argmax, evidences, vals = get_results_gear(claim, evidences)
+
+
     now = time.time()
     evidences = ["the Earth is roughly a sphere.", "The Earth is an irregularly shaped ellipsoid."]
     claim = "Earth is round"
@@ -136,38 +135,32 @@ if __name__ == "__main__":
 
     now = time.time()
 
-    eval_model(model, label_list, validset_reader, args.outdir, args.name)
+    argmax, labels, preds = eval_model(model, label_list, validset_reader, args.outdir, args.name)
+
+    # preds = json.dumps(preds)
+    print('preds:', preds)
     # model.eval()
     print("\n")
     # get_results_kgat(args.outdir, args.name)
     print('time elapsed for prediction:', time.time() - now)
-    
 
+    return Response(
+                json.dumps({
+                    "argmax": argmax[0],
+                    "vals": preds,
+                    "evidences": evidences,
+                }),
+                mimetype='application/json',
+                headers={
+                    'Cache-Control': 'no-cache',
+                    'Access-Control-Allow-Origin': '*'
+                }
+            )
 
-# @app.route('/', methods=['GET', 'POST'])
-# def answer():
-#     get_results()
-#     # claim = request.json['claim']
-#     # evidences = request.json['evidences']
-#     # argmax, evidences, vals = get_results_gear(claim, evidences)
-
-#     return Response(
-#                 json.dumps({
-#                     'argmax': argmax,
-#                     'evidences': evidences,
-#                     'vals': vals,
-#                 }),
-#                 mimetype='application/json',
-#                 headers={
-#                     'Cache-Control': 'no-cache',
-#                     'Access-Control-Allow-Origin': '*'
-#                 }
-#             )
-
-# app.run(
-#         host='0.0.0.0',
-#         port=24000,
-#         debug=False,
-#         threaded=True
-#     )
+app.run(
+        host='0.0.0.0',
+        port=24000,
+        debug=False,
+        threaded=True
+    )
 

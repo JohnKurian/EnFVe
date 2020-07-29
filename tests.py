@@ -89,11 +89,20 @@ def get_results_gear_api(claim, evidences):
     return argmax, evidences, vals
 
 def get_results_transformer_xh_api(claim, evidences):
-r = requests.post('http://0.0.0.0:17000/', json={'claim': claim, 'evidences': evidences})
-argmax = r.json()['argmax']
-evidences =r.json()['evidences']
-vals = r.json()['vals']
-print('gear results:', r.json())
+    r = requests.post('http://0.0.0.0:17000/', json={'claim': claim, 'evidences': evidences})
+    argmax = r.json()['argmax']
+    evidences =r.json()['evidences']
+    vals = r.json()['vals']
+    print('txh results:', r.json())
+    return argmax, evidences, vals
+
+
+def get_kgat_results_api(claim, evidences):
+    r = requests.post('http://0.0.0.0:24000/', json={'claim': claim, 'evidences': evidences})
+    argmax = r.json()['argmax']
+    evidences =r.json()['evidences']
+    vals = r.json()['vals']
+    print('kgat results:', r.json())
     return argmax, evidences, vals
 
 

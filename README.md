@@ -1,3 +1,8 @@
+# EnFVe
+
+Source code for the 2020 IEEE WI-IAT paper "EnFVe: An Ensemble Fact Verification Pipeline".
+
+
 ## Setting up the environment
 sh setup_environment.sh
 
@@ -43,3 +48,4 @@ Then, run the command:
 ```
 pip install -r requirements.txt
 ```
+
